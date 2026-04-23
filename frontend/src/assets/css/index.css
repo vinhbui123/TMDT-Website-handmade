@@ -1,0 +1,321 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --success-color: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.1);
+    --error-color: #ef4444;
+    --error-bg: rgba(239, 68, 68, 0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+/* --- Merged from assets/css/index.css --- */
+/* show banner*/
+.mainBanner {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.banner-show {
+    position: relative;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.list-images {
+    position: relative;
+}
+
+.slide {
+    width: 100%;
+    display: none;
+}
+
+.slide:first-child {
+    display: block;
+}
+
+.prev,
+.next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    user-select: none;
+    z-index: 1000;
+}
+
+.prev {
+    left: 0;
+}
+
+.next {
+    right: 0;
+}
+
+/*Voucher giảm giá*/
+.discount-main {
+    max-width: 1200px;
+    margin: 30px auto;
+}
+
+.discount-main h3 {
+    margin-bottom: 10px;
+}
+
+.discount-cointainer {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    /* scroll ngang */
+    white-space: nowrap;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #e28572 #fbe5e9;
+}
+
+.discount-cointainer::-webkit-scrollbar {
+    height: 8px;
+}
+
+.discount-cointainer::-webkit-scrollbar-thumb {
+    background: #e28572;
+    border-radius: 10px;
+}
+
+.discount-cointainer::-webkit-scrollbar-track {
+    background: #fbe5e9;
+}
+
+.discount-card {
+    width: 180px;
+    flex-shrink: 0;
+    background-color: #fbe5e9;
+    border: 1px dashed #cfbcc0;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.discount h5 {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.discount-requirement {
+    font-size: 12px;
+    margin-bottom: 5px;
+
+}
+
+.code {
+    font-size: 12px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.code .label {
+    font-weight: normal;
+}
+
+.code .discount-code {
+    font-weight: bold;
+    color: #dd4b39;
+    margin-left: 5px;
+}
+
+
+.expiration {
+    font-size: 10px;
+    margin-bottom: 5px;
+}
+
+.copy-btn {
+    background-color: #e28572;
+    float: right;
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.copy-btn:hover {
+    background-color: #d46a59;
+}
+
+/**/
+/* Phần tiêu đề */
+.promotion-section {
+    background-color: #fceef2;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.promotion-title {
+    font-size: 24px;
+    color: #e28572;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Container sản phẩm */
+.promotion-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.product-card {
+    width: 180px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 10px;
+    position: relative;
+}
+
+.product-card img {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.product-card h4 {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.product-card p {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+/* Giá */
+.price {
+    margin-bottom: 10px;
+}
+
+.current-price {
+    color: #dd4b39;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.original-price {
+    color: #bbb;
+    text-decoration: line-through;
+    font-size: 12px;
+}
+
+/* Nút thêm vào giỏ */
+.add-to-cart {
+    background-color: #e28572;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.add-to-cart:hover {
+    background-color: #d46a59;
+}
+
+
+.header-purchase {
+    display: flex;
+    align-items: center;
+    margin: 0 12px;
+    cursor: pointer;
+    color: #000;
+    transition: color 0.3s ease;
+    flex-direction: row;
+}
+
+.header-purchase i {
+    font-size: 24px;
+    margin-right: 20px;
+}
+
+.header-purchase .cart-text {
+    margin-left: 0;
+}
+
+.header-cart i {
+    font-size: 24px;
+}
+
+/*product*/
+#product-body-container {
+    max-width: 1200px;
+    margin: 30px auto;
+
+}
+
+#product-body-container .type {
+    margin-bottom: 20px;
+}
