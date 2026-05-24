@@ -6,33 +6,50 @@ import ProductList from './components/ProductList'
 import Footer from './components/Footer'
 import Login from './components/Login'
 import Register from './components/Register'
+import ForgotPassword from './components/ForgotPassword'
+import ChangePassword from './components/ChangePassword'
+import UpdateProfile from './components/UpdateProfile'
 import './assets/css/App.css'
 
 function App() {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  })
+  const [user, setUser] = useState(null)
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [cartCount, setCartCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const fetchUser = async () => {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' })
+      if (res.ok) {
+        const data = await res.json()
+        setUser(data)
+      } else {
+        setUser(null)
+        localStorage.removeItem('user')
+      }
+    } catch (err) {
+      console.error('Lỗi khi lấy thông tin user:', err)
+    }
+  }
+
+  // Setup user from API via Cookie
+  useEffect(() => {
+    fetchUser()
+
+    // Listen for cross-tab or manual storage events to sync login/logout
+    window.addEventListener('storage', fetchUser)
+    
+    return () => {
+      window.removeEventListener('storage', fetchUser)
+    }
+  }, [])
+
   // Fetch products on mount
   useEffect(() => {
     fetchProducts()
   }, [])
-
-  // Setup user from local storage
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedUser = localStorage.getItem('user');
-      setUser(savedUser ? JSON.parse(savedUser) : null);
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
 
   const fetchProducts = async () => {
     setLoading(true)
@@ -106,6 +123,9 @@ function App() {
           
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/profile" element={<UpdateProfile />} />
         </Routes>
       </div>
 

@@ -17,7 +17,8 @@
 .container-header {
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: space-between;
+  gap: 30px;
   padding: 16px 0;
   flex-wrap: wrap;
 }

@@ -1,7 +1,5 @@
 package com.project.web_hand_made_cd_web.Service;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -11,11 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.project.web_hand_made_cd_web.Dto.AuthResponse;
 import com.project.web_hand_made_cd_web.Dto.LoginRequest;
 import com.project.web_hand_made_cd_web.Dto.RegisterRequest;
@@ -164,5 +157,17 @@ public class AuthService {
             user = userRepository.save(user);
         }
         return new AuthResponse(true, "Đăng nhập thành công", user);
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public Optional<User> findById(Integer id) {
+        return userRepository.findById(id);
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 }

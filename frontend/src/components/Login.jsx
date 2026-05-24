@@ -35,6 +35,7 @@ const Login = () => {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ username, password }),
             });
             const data = await response.json();
@@ -52,6 +53,7 @@ const Login = () => {
                 const response = await fetch('/api/auth/google', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ token: tokenResponse.access_token }),
                 });
                 const data = await response.json();
@@ -74,6 +76,7 @@ const Login = () => {
             const response = await fetch('/api/auth/facebook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ token: fbResponse.accessToken }),
             });
             const data = await response.json();
@@ -93,6 +96,7 @@ const Login = () => {
 
                     {error && <div className="error-message">{error}</div>}
                     {success && <div className="success-message">{success}</div>}
+
 
                     <div className="login__field">
                         <i className="login__icon fas fa-user"></i>
@@ -116,6 +120,10 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                    </div>
+
+                    <div style={{textAlign: 'right', marginBottom: '15px'}}>
+                        <Link to="/forgot-password" style={{fontSize: '13px', color: '#888', textDecoration: 'none'}}>Quên mật khẩu?</Link>
                     </div>
 
                     <button type="submit" className="login__submit">

@@ -6,9 +6,15 @@ function Header({ user, categories, cartCount }) {
   const [searchKeyword, setSearchKeyword] = useState('')
   const navigate = useNavigate()
 
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     e.preventDefault()
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    } catch (err) {
+      console.error('Logout error', err)
+    }
     localStorage.removeItem('user')
+    // Trigger storage event so App.jsx re-fetches or unsets user
     window.dispatchEvent(new Event('storage'))
     navigate('/login')
   }
@@ -36,20 +42,21 @@ function Header({ user, categories, cartCount }) {
           <div className="header-account">
             <span className="account-icon">
               {user ? (
-                <a href="/account">
+                <a href="/profile">
                   {user.avatar ? (
                     <img
                       src={user.avatar}
                       alt="Avatar"
                       className="avatar-img"
+                      style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }}
                       onError={(e) => { e.target.src = '/images/default-avatar.png' }}
                     />
                   ) : (
-                    <i className="fas fa-user"></i>
+                    <i className="fas fa-user" style={{ fontSize: '36px' }}></i>
                   )}
                 </a>
               ) : (
-                <a href="/login"><i className="fas fa-user"></i></a>
+                <a href="/login"><i className="fas fa-user" style={{ fontSize: '36px' }}></i></a>
               )}
             </span>
             <div className="account-info">

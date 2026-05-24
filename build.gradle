@@ -38,4 +38,7 @@ dependencies {
 	
 	// Google API Client for verifying OAuth tokens
 	implementation 'com.google.api-client:google-api-client:2.2.0'
+	
+	// Spring Mail for sending OTP emails
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
