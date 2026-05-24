@@ -45,9 +45,18 @@ public class Product {
     @Transient
     private List<String> subImg;
 
-    // QUAN TRỌNG: Lấy dữ liệu từ cột quantity trong SQL
-    @Column(name = "quantity")
-    private int quantity;
+    // Lấy thông tin từ bảng inventory thông qua relationship
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Inventory inventory;
+
+    // Custom getter để giữ nguyên logic cũ getQuantity()
+    public int getQuantity() {
+        return inventory != null && inventory.getQuantity() != null ? inventory.getQuantity() : 0;
+    }
 
     @Transient
     private int stock; // Biến tạm để tính toán nếu cần

@@ -110,7 +110,7 @@ function Header({ user, categories, cartCount }) {
             </div>
 
             {user && (
-              <div className="header-purchase" onClick={() => window.location.href = '/purchase'}>
+              <div className="header-purchase" onClick={() => window.location.href = '/order-history'}>
                 <i className="fas fa-receipt"></i>
                 <span className="cart-text">Đơn Mua</span>
               </div>

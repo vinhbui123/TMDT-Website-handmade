@@ -61,8 +61,11 @@ public class OrderService {
                     .build();
             orderDetailRepository.save(detail);
 
-            product.setQuantity(product.getQuantity() - item.getQuantity());
-            productRepository.save(product);
+            if (product.getInventory() != null) {
+                int currentOut = product.getInventory().getQuantityOut() != null ? product.getInventory().getQuantityOut() : 0;
+                product.getInventory().setQuantityOut(currentOut + item.getQuantity());
+                productRepository.save(product);
+            }
 
             cartService.removeProductFromCart(item.getProductId());
         }
