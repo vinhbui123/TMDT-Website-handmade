@@ -1,0 +1,213 @@
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 600px;
+}
+
+.login-screen {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Tiêu đề */
+.login-title {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-title h3 {
+    font-size: 22px;
+    color: #333;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Form đăng nhập */
+.login-form {
+    width: 100%;
+}
+
+.login__field {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.login__icon {
+    font-size: 20px;
+    color: #333;
+    margin-right: 15px;
+}
+
+/* Ô nhập liệu */
+.login__input {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.login__input:focus {
+    border-color: #050403;
+    background-color: #f9f9f9;
+}
+
+/* Nút đăng nhập */
+.login__submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #050403;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    text-transform: uppercase;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login__submit:hover {
+    background-color: #333;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Liên kết */
+.login__options {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.login__link {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.login__link:hover {
+    color: #050403;
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.social-login-divider span {
+    padding: 0 10px;
+    color: #888;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.social-login-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.google-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+}
+
+.google-custom-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 40px;
+    padding: 0 10px;
+    background-color: white;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-sizing: border-box;
+}
+
+.google-custom-btn:hover {
+    background-color: #f8f9fa;
+}
+
+.google-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.fb-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 1;
+    height: 40px; /* Match standard Google button height */
+    padding: 0 10px;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-sizing: border-box;
+}
+
+.fb-login-btn:hover {
+    background-color: #166fe5;
+}

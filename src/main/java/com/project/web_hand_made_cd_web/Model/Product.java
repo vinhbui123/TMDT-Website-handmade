@@ -45,18 +45,28 @@ public class Product {
     @Transient
     private List<String> subImg;
 
-    // FIX: Đã xóa @Transient để nhận giá trị từ cột 'quantity' trong DB
+    // QUAN TRỌNG: Lấy dữ liệu từ cột quantity trong SQL
     @Column(name = "quantity")
     private int quantity;
 
     @Transient
-    private int stock;
+    private int stock; // Biến tạm để tính toán nếu cần
 
-    @ManyToMany(fetch = FetchType.EAGER) // THÊM DÒNG NÀY VÀO ĐÂY
+    // Kết nối bảng màu sắc
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "product_color",
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "color_id")
     )
     private List<Color> colors;
+
+    // Kết nối bảng chất liệu (Lấy từ bản của Vinh)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "product_materials",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "material_id")
+    )
+    private List<Material> materials;
 }

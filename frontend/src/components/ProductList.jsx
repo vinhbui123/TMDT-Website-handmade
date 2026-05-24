@@ -57,8 +57,8 @@ function ProductList({ products, onAddToCart }) {
   }
 
   return (
-      <div className="product-body-container">
-        <h3 className="product-section-title">SẢN PHẨM CÓ LƯỢT XEM NHIỀU NHẤT</h3>
+    <div className="product-body-container">
+      <h3 className="product-section-title">SẢN PHẨM CÓ LƯỢT XEM NHIỀU NHẤT</h3>
 
         <div className="product-list">
           {products.map((product) => {
@@ -70,83 +70,96 @@ function ProductList({ products, onAddToCart }) {
                 ? product.price - (product.price * product.discount / 100)
                 : product.price
 
-            return (
-                <div key={product.id} className="product-box">
-                  <a href={`/product-detail?id=${product.id}`} className="product-link">
-                    {hasDiscount && (
-                        <div className="discount-badge">-{product.discount}%</div>
-                    )}
+          return (
+            <div key={product.id} className="product-box">
+              <a href={`/product-detail?id=${product.id}`} className="product-link">
+                {hasDiscount && (
+                    <div className="discount-badge">-{product.discount}%</div>
+                )}
 
-                    <div className="hinh-sp">
-                      <img
-                          src={`/${product.img}`}
-                          alt={product.name}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/200?text=No+Image";
-                          }}
+                <div className="hinh-sp">
+                  {/* FIX: Prepend '/' to use the absolute path from the public folder.
+                    Since your DB has 'images/moc_gau.jpg', this results in '/images/moc_gau.jpg'
+                  */}
+                  <img
+                      src={`/${product.img}`}
+                      alt={product.name}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://via.placeholder.com/200?text=No+Image";
+                      }}
+                  />
+                </div>
+
+                <p className="ten-sp">{product.name}</p>
+
+                <div className="gia-tien">
+                  {hasDiscount ? (
+                      <>
+                        <span className="gia-moi">{formatPrice(discountedPrice)}</span>
+                        <span className="gia-cu">{formatPrice(product.price)}</span>
+                      </>
+                  ) : (
+                      <span className="gia-moi">{formatPrice(product.price)}</span>
+                  )}
+                </div>
+
+                <div className="product-footer">
+                  {/* 1. Hiển thị lượt xem từ bên Vinh - giúp giao diện chuyên nghiệp */}
+                  <p className="view-count" style={{fontSize: '12px', color: '#666'}}>
+                    <i className="fas fa-eye"></i> {product.view || 0}
+                  </p>
+
+                  <div className="product-footer-actions" style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                    {/* 2. Giữ lại ô nhập số lượng của bạn - cực kỳ quan trọng cho UX */}
+                    <div className="qty-input-container" onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}>
+                      <input
+                          type="number"
+                          min="1"
+                          max={product.quantity || 1}
+                          value={quantities[product.id] || 1}
+                          onChange={(e) => handleQtyChange(product.id, e.target.value, product.quantity)}
+                          className="product-qty-input"
+                          disabled={product.quantity <= 0}
                       />
                     </div>
 
-                    <p className="ten-sp">{product.name}</p>
-
-                    <div className="gia-tien">
-                      {hasDiscount ? (
-                          <>
-                            <span className="gia-moi">{formatPrice(discountedPrice)}</span>
-                            <span className="gia-cu">{formatPrice(product.price)}</span>
-                          </>
+                    {/* 3. Nút Add to Cart (Gộp logic bảo vệ quantity <= 0) */}
+                    <button
+                        type="button"
+                        className={`add-to-cart ${addedId === product.id ? 'added' : ''}`}
+                        onClick={(e) => handleAddToCart(e, product)}
+                        disabled={loadingId === product.id || product.quantity <= 0}
+                    >
+                      {loadingId === product.id ? (
+                          <i className="fa-solid fa-spinner fa-spin"></i>
+                      ) : addedId === product.id ? (
+                          <i className="fa-solid fa-check"></i>
                       ) : (
-                          <span className="gia-moi">{formatPrice(product.price)}</span>
+                          <i className="fa-solid fa-cart-plus"></i>
                       )}
-                    </div>
-
-                    <div className="product-footer">
-                      <div className="qty-input-container" onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation()
-                      }}>
-                        <input
-                            type="number"
-                            min="1"
-                            max={product.quantity || 1}
-                            value={quantities[product.id] || 1}
-                            onChange={(e) => handleQtyChange(product.id, e.target.value, product.quantity)}
-                            className="product-qty-input"
-                            disabled={product.quantity <= 0}
-                        />
-                      </div>
-
-                      <button
-                          type="button"
-                          className={`add-to-cart ${addedId === product.id ? 'added' : ''}`}
-                          onClick={(e) => handleAddToCart(e, product)}
-                          disabled={loadingId === product.id || product.quantity <= 0}
-                      >
-                        {loadingId === product.id ? (
-                            <i className="fa-solid fa-spinner fa-spin"></i>
-                        ) : addedId === product.id ? (
-                            <i className="fa-solid fa-check"></i>
-                        ) : (
-                            <i className="fa-solid fa-cart-plus"></i>
-                        )}
-                      </button>
-                    </div>
-                  </a>
+                    </button>
+                  </div>
                 </div>
-            )
+              </a>
+            </div>
+          )
           })}
         </div>
 
-        {/* Thông báo Popup */}
-        {addedId && (
-            <div className="cart-popup show">
-              <div className="cart-popup-content">
-                <p>✅ Đã thêm vào giỏ hàng!</p>
-              </div>
-            </div>
-        )}
-      </div>
+      {/* Cart popup notification */}
+      {addedId && (
+        <div className="cart-popup show">
+          <div className="cart-popup-content">
+            <i className="fa-solid fa-check-circle"></i>
+            <p>Sản phẩm đã được thêm vào giỏ hàng thành công!</p>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
