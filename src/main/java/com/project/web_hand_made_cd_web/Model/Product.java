@@ -2,57 +2,61 @@ package com.project.web_hand_made_cd_web.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "products")
-@Data // Tự động tạo Getter, Setter, toString, equals, hashCode
-@NoArgsConstructor // Tạo constructor không tham số (bắt buộc cho JPA)
-@AllArgsConstructor // Tạo constructor đầy đủ tham số
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Product {
     @Id
     private int id;
-    @Column
+
+    @Column(name = "catalog_id")
     private int catalog_id;
-    @Column
+
+    @Column(name = "name")
     private String name;
-    @Column
+
+    @Column(name = "img")
     private String img;
-    @Column
+
+    @Column(name = "price")
     private int price;
-    @Column
+
+    @Column(name = "discount")
     private int discount;
-    @Column
+
+    @Column(name = "view")
     private int view;
-    @Column
+
+    @Column(name = "description")
     private String description;
-    @Column
+
+    @Column(name = "created_at")
     private Date created_at;
-    @Column
+
+    @Column(name = "updated_at")
     private Date updated_at;
+
     @Transient
     private List<String> subImg;
-    @Transient // Hibernate will not look for this in the database
+
+    // FIX: Đã xóa @Transient để nhận giá trị từ cột 'quantity' trong DB
+    @Column(name = "quantity")
     private int quantity;
-    @Transient // Hibernate will not look for this in the database
+
+    @Transient
     private int stock;
-    @ManyToMany
+
+    @ManyToMany(fetch = FetchType.EAGER) // THÊM DÒNG NÀY VÀO ĐÂY
     @JoinTable(
-            name = "product_color", // The name of your junction table in SQL
-            joinColumns = @JoinColumn(name = "product_id"), // FK to products table
-            inverseJoinColumns = @JoinColumn(name = "color_id") // FK to colors table
+            name = "product_color",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "color_id")
     )
     private List<Color> colors;
-
-    @ManyToMany
-    @JoinTable(
-            name = "product_materials",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "material_id")
-    )
-    private List<Material> materials;
 }
-

@@ -1,93 +1,120 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Banner from './components/Banner'
 import ProductList from './components/ProductList'
 import Footer from './components/Footer'
+import CartPage from './pages/CartPage'
+import Checkout from './pages/Checkout'
+import VNPayReturn from './components/VNPayReturn'
+import OrderHistory from './pages/OrderHistory'
 import './assets/css/App.css'
 
 function App() {
-  const [user, setUser] = useState(null)
-  const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [cartCount, setCartCount] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
 
-  // Fetch products on mount
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  // Hàm lấy số lượng giỏ hàng dùng chung
+  const updateCartCount = async () => {
+    try {
+      const res = await fetch('/api/cart')
+      if (res.ok) {
+        const data = await res.json()
+        setCartCount(data.cartCount || 0)
+      }
+    } catch (err) {
+      console.warn("Chưa lấy được số lượng giỏ hàng")
+    }
+  }
 
+  // Hàm lấy danh sách sản phẩm
   const fetchProducts = async () => {
     setLoading(true)
-    setError(null)
     try {
       const res = await fetch('/api/products')
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`)
       const data = await res.json()
-      setProducts(data)
+
+      if (Array.isArray(data)) {
+        // Tính giá hiển thị sau khi trừ discount (%) từ dữ liệu thật
+        const processed = data.map(p => ({
+          ...p,
+          displayPrice: p.discount > 0 ? p.price * (1 - p.discount/100) : p.price
+        }))
+        setProducts(processed)
+      }
     } catch (err) {
-      setError(err.message)
-      console.error('Error fetching products:', err)
+      console.error("Lỗi tải sản phẩm:", err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleAddToCart = async (productId) => {
+  useEffect(() => {
+    fetchProducts()
+    updateCartCount()
+
+    // Lắng nghe các thay đổi từ trang khác để cập nhật Header
+    window.addEventListener('storage', updateCartCount)
+    window.addEventListener('cartUpdated', updateCartCount)
+
+    return () => {
+      window.removeEventListener('storage', updateCartCount)
+      window.removeEventListener('cartUpdated', updateCartCount)
+    }
+  }, [])
+
+  const handleAddToCart = async (productId, quantity = 1) => {
     try {
-      const res = await fetch('/api/add-cart', {
+      const res = await fetch('/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: productId })
+        body: JSON.stringify({ productId, quantity })
       })
-
-      if (!res.ok) throw new Error('Failed to add to cart')
-
       const data = await res.json()
       if (data.success) {
-        setCartCount(prev => prev + 1)
+        setCartCount(data.cartCount)
       } else {
-        throw new Error(data.message || 'Unknown error')
+        alert(data.message)
       }
     } catch (err) {
-      console.error('Add to cart error:', err)
-      // Still show success animation in UI for now (backend not fully connected)
+      alert("Lỗi kết nối giỏ hàng!")
     }
   }
 
   return (
-    <div className="app">
-      <Header user={user} categories={categories} cartCount={cartCount} />
+      <Router>
+        <div className="app">
+          <Header cartCount={cartCount} />
+          <main className="mainBody">
+            <Routes>
+              {/* TRANG CHỦ */}
+              <Route path="/" element={
+                <div className="container">
+                  <Banner />
+                  <h2 style={{ textAlign: 'center', margin: '30px 0', color: '#ee4d2d' }}>
+                    DANH MỤC SẢN PHẨM HANDMADE
+                  </h2>
+                  {loading ? (
+                      <div style={{ textAlign: 'center', padding: '40px' }}>Đang tải sản phẩm...</div>
+                  ) : (
+                      <ProductList products={products} onAddToCart={handleAddToCart} />
+                  )}
+                </div>
+              } />
 
-      <div className="mainBody">
-        <div className="container">
-          <Banner />
+              {/* CÁC TRANG KHÁC */}
+              <Route path="/cart" element={<CartPage onCartChange={updateCartCount} />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/vnpay-return" element={<VNPayReturn />} />
 
-          {loading && (
-            <div className="loading-section">
-              <div className="loading-spinner"></div>
-              <p>Đang tải sản phẩm...</p>
-            </div>
-          )}
-
-          {error && (
-            <div className="error-section">
-              <p>❌ Lỗi: {error}</p>
-              <button className="btn btn--primary" onClick={fetchProducts}>
-                🔄 Thử lại
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && (
-            <ProductList products={products} onAddToCart={handleAddToCart} />
-          )}
+              {/* TRANG LỊCH SỬ - Kiểm tra kỹ đường dẫn này */}
+              <Route path="/order-history" element={<OrderHistory />} />
+            </Routes>
+          </main>
+          <Footer />
         </div>
-      </div>
-
-      <Footer />
-    </div>
+      </Router>
   )
 }
 
