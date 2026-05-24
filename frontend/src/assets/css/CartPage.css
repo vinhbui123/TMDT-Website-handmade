@@ -1,0 +1,115 @@
+/* Container chính */
+.cart-page {
+    padding: 40px 0;
+    min-height: 60vh;
+}
+
+.cart-page h2 {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 30px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+/* Khi giỏ hàng trống */
+.empty-cart {
+    text-align: center;
+    padding: 50px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.empty-cart p {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Bảng giỏ hàng */
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    background: #fff;
+}
+
+.cart-table th {
+    text-align: left;
+    padding: 15px;
+    border-bottom: 2px solid #eee;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+.cart-table td {
+    padding: 20px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+/* Thông tin sản phẩm trong bảng */
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.product-info img {
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.product-info span {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Tổng tiền và nút thanh toán */
+.cart-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 20px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #333;
+}
+
+.cart-summary h3 {
+    font-size: 22px;
+    font-weight: 900;
+    color: #ee4d2d; /* Màu cam đặc trưng của thương mại điện tử */
+}
+
+.btn-checkout {
+    background-color: #333;
+    color: #fff;
+    padding: 15px 40px;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.btn-checkout:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Responsive cho điện thoại */
+@media (max-width: 768px) {
+    .cart-table th:nth-child(2),
+    .cart-table td:nth-child(2) {
+        display: none; /* Ẩn cột giá trên mobile cho gọn */
+    }
+
+    .product-info span {
+        font-size: 14px;
+    }
+}

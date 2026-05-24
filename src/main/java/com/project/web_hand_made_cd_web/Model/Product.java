@@ -2,52 +2,67 @@ package com.project.web_hand_made_cd_web.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "products")
-@Data // Tự động tạo Getter, Setter, toString, equals, hashCode
-@NoArgsConstructor // Tạo constructor không tham số (bắt buộc cho JPA)
-@AllArgsConstructor // Tạo constructor đầy đủ tham số
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Product {
     @Id
     private int id;
-    @Column
+
+    @Column(name = "catalog_id")
     private int catalog_id;
-    @Column
+
+    @Column(name = "name")
     private String name;
-    @Column
+
+    @Column(name = "img")
     private String img;
-    @Column
+
+    @Column(name = "price")
     private int price;
-    @Column
+
+    @Column(name = "discount")
     private int discount;
-    @Column
+
+    @Column(name = "view")
     private int view;
-    @Column
+
+    @Column(name = "description")
     private String description;
-    @Column
+
+    @Column(name = "created_at")
     private Date created_at;
-    @Column
+
+    @Column(name = "updated_at")
     private Date updated_at;
+
     @Transient
     private List<String> subImg;
-    @Transient // Hibernate will not look for this in the database
+
+    // QUAN TRỌNG: Lấy dữ liệu từ cột quantity trong SQL
+    @Column(name = "quantity")
     private int quantity;
-    @Transient // Hibernate will not look for this in the database
-    private int stock;
-    @ManyToMany
+
+    @Transient
+    private int stock; // Biến tạm để tính toán nếu cần
+
+    // Kết nối bảng màu sắc
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "product_color", // The name of your junction table in SQL
-            joinColumns = @JoinColumn(name = "product_id"), // FK to products table
-            inverseJoinColumns = @JoinColumn(name = "color_id") // FK to colors table
+            name = "product_color",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "color_id")
     )
     private List<Color> colors;
 
-    @ManyToMany
+    // Kết nối bảng chất liệu (Lấy từ bản của Vinh)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "product_materials",
             joinColumns = @JoinColumn(name = "product_id"),
@@ -55,4 +70,3 @@ public class Product {
     )
     private List<Material> materials;
 }
-

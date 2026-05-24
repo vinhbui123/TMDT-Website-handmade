@@ -240,3 +240,26 @@
     padding: 8px 12px 10px;
   }
 }
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+}
+
+.product-qty-input {
+  width: 50px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.9rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.qty-input-container {
+  display: flex;
+  align-items: center;
+}
