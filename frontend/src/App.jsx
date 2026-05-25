@@ -20,6 +20,7 @@ import ChangePassword from './components/ChangePassword'
 import UpdateProfile from './components/UpdateProfile'
 
 import './assets/css/App.css'
+import ProductCategoryList from './pages/ProductCategoryList'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -169,6 +170,8 @@ function App() {
               <Route path="/vnpay-return" element={<VNPayReturn />} />
               <Route path="/order-history" element={<OrderHistory />} />
               <Route path="/product/:id" element={<ProductDetail user={user} updateCartCount={updateCartCount} />} />
+
+              <Route path="/products" element={<ProductCategoryList />} />
             </Routes>
           </main>
 
