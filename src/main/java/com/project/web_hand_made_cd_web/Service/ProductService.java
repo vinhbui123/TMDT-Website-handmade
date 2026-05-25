@@ -1,5 +1,8 @@
 package com.project.web_hand_made_cd_web.Service;
 
+import com.project.web_hand_made_cd_web.Dto.ColorDTO;
+import com.project.web_hand_made_cd_web.Dto.MaterialDTO;
+import com.project.web_hand_made_cd_web.Dto.ProductDTO;
 import com.project.web_hand_made_cd_web.Model.Product;
 import com.project.web_hand_made_cd_web.Repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +33,12 @@ public class ProductService {
         productRepository.incrementViewCount(productId);
     }
 
-    public List<Product> searchProducts(String keyword) {
-        return productRepository.searchByNameNative(keyword);
+    public List<ProductDTO> searchProducts(String keyword) {
+        List<Product> products = productRepository.searchByName(keyword);
+
+        return products.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     public List<Product> getTopViewed(int limit) {
@@ -52,5 +59,45 @@ public class ProductService {
 
     public List<Product> getTopRated() {
         return productRepository.findTopRated();
+    }
+
+    private ProductDTO convertToDTO(Product product) {
+
+        ProductDTO dto = new ProductDTO();
+
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setImg(product.getImg());
+        dto.setPrice(product.getPrice());
+        dto.setDiscount(product.getDiscount());
+        dto.setRating(product.getAverageRating());
+
+        dto.setColors(
+                product.getColors().stream().map(color -> {
+
+                    ColorDTO colorDTO = new ColorDTO();
+
+                    colorDTO.setId(color.getId());
+                    colorDTO.setName(color.getName());
+
+                    return colorDTO;
+
+                }).toList()
+        );
+
+        dto.setMaterials(
+                product.getMaterials().stream().map(material -> {
+
+                    MaterialDTO materialDTO = new MaterialDTO();
+
+                    materialDTO.setId(material.getId());
+                    materialDTO.setName(material.getName());
+
+                    return materialDTO;
+
+                }).toList()
+        );
+
+        return dto;
     }
 }

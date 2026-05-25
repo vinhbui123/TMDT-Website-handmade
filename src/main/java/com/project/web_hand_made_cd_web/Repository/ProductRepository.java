@@ -22,6 +22,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> { // 
     @Query(value = "SELECT * FROM products WHERE name LIKE CONCAT('%', :keyword, '%') ORDER BY RAND()", nativeQuery = true)
     List<Product> searchByNameNative(@Param("keyword") String keyword);
 
+    @Query("SELECT p FROM Product p WHERE p.name LIKE %:name%")
+    List<Product> searchByName(@Param("name") String name);
+
     // Replacement for getProductsInStock
     @Query("SELECT p FROM Product p JOIN Inventory i ON p.id = i.productId WHERE i.quantity > 0")
     List<Product> findInStock();

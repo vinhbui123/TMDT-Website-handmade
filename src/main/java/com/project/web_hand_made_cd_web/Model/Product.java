@@ -1,7 +1,10 @@
 package com.project.web_hand_made_cd_web.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
+
 import java.util.Date;
 import java.util.List;
 
@@ -78,4 +81,11 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "material_id")
     )
     private List<Material> materials;
+
+    @Formula("(SELECT COALESCE(AVG(f.rating), 0) FROM comments f WHERE f.product_id = id)")
+    private Double averageRating;
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnore
+    private List<Comment> comments;
 }
