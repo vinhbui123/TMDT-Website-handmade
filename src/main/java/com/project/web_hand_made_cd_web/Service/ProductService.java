@@ -137,4 +137,23 @@ public class ProductService {
 
         return dto;
     }
+
+    public List<Comment> getCommentsByProductId(int productId) {
+        return commentRepository.findByProductIdOrderByCreateAtDesc(productId);
+    }
+
+    public Comment addComment(int productId, int userId, int rating, String commentContent) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new RuntimeException("Product not found"));
+            
+        Comment comment = new Comment();
+        comment.setProduct(product);
+        comment.setUserId(userId);
+        comment.setRating(rating);
+        comment.setComment(commentContent);
+        comment.setCreateAt(java.time.LocalDateTime.now());
+        comment.setUpdatedAt(java.time.LocalDateTime.now());
+        
+        return commentRepository.save(comment);
+    }
 }

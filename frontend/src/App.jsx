@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Banner from './components/Banner'
 import ProductList from './components/ProductList'
 import Footer from './components/Footer'
+import Chatbot from './components/Chatbot'
 
 // --- Các trang của bạn (HEAD) ---
 import CartPage from './pages/CartPage'
@@ -176,6 +177,7 @@ function App() {
           </main>
 
           <Footer />
+          <Chatbot />
         </div>
       </Router>
   )
