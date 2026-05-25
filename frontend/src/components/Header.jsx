@@ -1,10 +1,19 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import '../assets/css/Header.css'
 
 function Header({ user, categories, cartCount }) {
-  const [searchKeyword, setSearchKeyword] = useState('')
   const navigate = useNavigate()
+
+  // Biến lưu chữ người dùng đang gõ (dùng cho ô input và dropdown)
+  const [inputKeyword, setInputKeyword] = useState("");
+
+  // Biến lưu từ khóa chính thức (chỉ đổi khi bấm Enter, dùng cho danh sách chính)
+  const [appliedKeyword, setAppliedKeyword] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const searchRef = useRef(null);
 
   const handleLogout = async (e) => {
     e.preventDefault()
@@ -19,13 +28,55 @@ function Header({ user, categories, cartCount }) {
     navigate('/login')
   }
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (searchKeyword.trim()) {
-      // TODO: implement search navigation
-      console.log('Searching for:', searchKeyword)
+  // Kiểm tra người dùng có bấm ra ngoài thanh tìm kiếm không
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+      };
+  }, []);
+
+  // Xử lý Debounce gọi API Gợi ý
+  useEffect(() => {
+    // Nếu ô tìm kiếm trống, tắt dropdown và xóa gợi ý
+    if (!inputKeyword.trim()) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
     }
-  }
+
+    // Tạo một bộ đếm thời gian (Debounce) 500ms
+    const delaySearch = setTimeout(async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/products/search?keyword=${inputKeyword}`);
+        // Kiểm tra API trả về thành công mới lấy data
+        if (res.ok) {
+           const data = await res.json();
+           setSuggestions(data);
+           setShowDropdown(true);
+        }
+      } catch (error) {
+        console.error("Lỗi tải gợi ý", error);
+      }
+    }, 500); // 500 mili-giây
+
+    // Dọn dẹp: Nếu người dùng gõ tiếp khi chưa hết 500ms, hủy bộ đếm cũ
+    return () => clearTimeout(delaySearch);
+  }, [inputKeyword]);
+
+  // Hàm xử lý khi bấm nút Tìm kiếm
+  const handleSearchSubmit = (e) => {
+    e.preventDefault(); // Ngăn chặn load lại trang
+    setShowDropdown(false); // Đóng dropdown đi
+
+    setAppliedKeyword(inputKeyword);
+  };
 
   return (
     <header className="mainHeader" id="site-header">
@@ -88,15 +139,51 @@ function Header({ user, categories, cartCount }) {
           {/* Search */}
           <div className="header-search">
             <div className="search-box">
-              <form onSubmit={handleSearch}>
+              <form ref={searchRef} onSubmit={handleSearchSubmit} style={{ position: "relative" }}>
                 <input
                   type="text"
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  value={inputKeyword}
+                  onChange={(e) => setInputKeyword(e.target.value)}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowDropdown(true)
+                  }}
                   placeholder="Tìm Kiếm Sản Phẩm"
                   required
                 />
                 <button type="submit"><i className="fas fa-search"></i></button>
+
+                {/* KHUNG DROP DOWN GỢI Ý */}
+                {showDropdown && suggestions.length > 0 && (
+                  <div
+                    className="dropdown-menu show w-100 position-absolute"
+                    style={{
+                      display: "block", // Ép buộc hiển thị
+                      top: "100%",
+                      left: 0,
+                      zIndex: 9999, // Tăng z-index lên thật cao để không bị đè
+                      marginTop: "2px",
+                      maxHeight: "300px",
+                      overflowY: "auto",
+                      backgroundColor: "#fff", // Đảm bảo có nền trắng
+                      boxShadow: "0 0.25rem 1rem rgba(0,0,0,.15)" // Thêm bóng đổ cho dễ nhìn
+                    }}
+                  >
+                    {suggestions.map((prod) => (
+                      <Link
+                        key={prod.id}
+                        to={`/product-detail/${prod.id}`}
+                        className="dropdown-item d-flex align-items-center py-2"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <img src={prod.img} alt={prod.name} width="40" className="me-3 rounded"/>
+                          <div>
+                            <h6 className="fs-sm mb-0">{prod.name}</h6>
+                              <span className="text-accent fs-xs">{prod.price.toLocaleString()} VNĐ</span>
+                          </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </form>
             </div>
           </div>
