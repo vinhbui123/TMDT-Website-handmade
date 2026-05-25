@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.web_hand_made_cd_web.Model.Product;
+import com.project.web_hand_made_cd_web.Model.Comment;
+import com.project.web_hand_made_cd_web.Model.User;
 import com.project.web_hand_made_cd_web.Service.ProductService;
+import jakarta.servlet.http.HttpSession;
 
 import lombok.RequiredArgsConstructor;
 

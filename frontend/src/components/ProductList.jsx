@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import '../assets/css/ProductList.css'
 
 function formatPrice(price) {
@@ -72,17 +73,14 @@ function ProductList({ products, onAddToCart }) {
 
           return (
             <div key={product.id} className="product-box">
-              <a href={`/product-detail?id=${product.id}`} className="product-link">
+              <Link to={`/product/${product.id}`} className="product-link">
                 {hasDiscount && (
                     <div className="discount-badge">-{product.discount}%</div>
                 )}
 
                 <div className="hinh-sp">
-                  {/* FIX: Prepend '/' to use the absolute path from the public folder.
-                    Since your DB has 'images/moc_gau.jpg', this results in '/images/moc_gau.jpg'
-                  */}
                   <img
-                      src={`/${product.img}`}
+                      src={product.img}
                       alt={product.name}
                       onError={(e) => {
                         e.target.onerror = null;
@@ -144,7 +142,7 @@ function ProductList({ products, onAddToCart }) {
                     </button>
                   </div>
                 </div>
-              </a>
+              </Link>
             </div>
           )
           })}

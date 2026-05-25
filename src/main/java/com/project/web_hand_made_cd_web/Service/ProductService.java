@@ -4,7 +4,9 @@ import com.project.web_hand_made_cd_web.Dto.ColorDTO;
 import com.project.web_hand_made_cd_web.Dto.MaterialDTO;
 import com.project.web_hand_made_cd_web.Dto.ProductDTO;
 import com.project.web_hand_made_cd_web.Model.Product;
+import com.project.web_hand_made_cd_web.Model.Comment;
 import com.project.web_hand_made_cd_web.Repository.ProductRepository;
+import com.project.web_hand_made_cd_web.Repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CommentRepository commentRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();

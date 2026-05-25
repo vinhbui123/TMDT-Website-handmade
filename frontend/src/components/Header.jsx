@@ -154,32 +154,19 @@ function Header({ user, categories, cartCount }) {
 
                 {/* KHUNG DROP DOWN GỢI Ý */}
                 {showDropdown && suggestions.length > 0 && (
-                  <div
-                    className="dropdown-menu show w-100 position-absolute"
-                    style={{
-                      display: "block", // Ép buộc hiển thị
-                      top: "100%",
-                      left: 0,
-                      zIndex: 9999, // Tăng z-index lên thật cao để không bị đè
-                      marginTop: "2px",
-                      maxHeight: "300px",
-                      overflowY: "auto",
-                      backgroundColor: "#fff", // Đảm bảo có nền trắng
-                      boxShadow: "0 0.25rem 1rem rgba(0,0,0,.15)" // Thêm bóng đổ cho dễ nhìn
-                    }}
-                  >
+                  <div className="search-dropdown">
                     {suggestions.map((prod) => (
                       <Link
                         key={prod.id}
                         to={`/product-detail/${prod.id}`}
-                        className="dropdown-item d-flex align-items-center py-2"
+                        className="search-dropdown-item"
                         onClick={() => setShowDropdown(false)}
                       >
-                        <img src={prod.img} alt={prod.name} width="40" className="me-3 rounded"/>
-                          <div>
-                            <h6 className="fs-sm mb-0">{prod.name}</h6>
-                              <span className="text-accent fs-xs">{prod.price.toLocaleString()} VNĐ</span>
-                          </div>
+                        <img src={prod.img} alt={prod.name} className="search-dropdown-img"/>
+                        <div className="search-dropdown-info">
+                          <h6 className="search-dropdown-name">{prod.name}</h6>
+                          <span className="search-dropdown-price">{prod.price.toLocaleString()} VNĐ</span>
+                        </div>
                       </Link>
                     ))}
                   </div>
