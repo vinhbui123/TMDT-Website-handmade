@@ -6,7 +6,9 @@ import lombok.*;
 import org.hibernate.annotations.Formula;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -73,7 +75,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "color_id")
     )
-    private List<Color> colors;
+    private Set<Color> colors = new HashSet<>();
 
     // Kết nối bảng chất liệu (Lấy từ bản của Vinh)
     @ManyToMany(fetch = FetchType.EAGER)
@@ -82,7 +84,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "material_id")
     )
-    private List<Material> materials;
+    private Set<Material> materials = new HashSet<>();
 
     @Formula("(SELECT COALESCE(AVG(f.rating), 0) FROM comments f WHERE f.product_id = id)")
     private Double averageRating;

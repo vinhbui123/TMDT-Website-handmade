@@ -8,4 +8,6 @@ public class MaterialDTO {
     private Integer id;
 
     private String name;
+
+    private Integer productCount;
 }

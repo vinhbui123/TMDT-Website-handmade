@@ -8,7 +8,10 @@ import com.project.web_hand_made_cd_web.Model.Comment;
 import com.project.web_hand_made_cd_web.Repository.ProductRepository;
 import com.project.web_hand_made_cd_web.Repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,6 +65,37 @@ public class ProductService {
 
     public List<Product> getTopRated() {
         return productRepository.findTopRated();
+    }
+
+    public Page<ProductDTO> getProductsPaginated(int page, int size, String sort, Integer colorId, Integer materialId, Integer maxPrice) {
+        // Mặc định sắp xếp theo ID giảm dần (Sản phẩm mới nhất)
+        Sort sortOrder = Sort.by("id").descending();
+
+        // Kiểm tra chuỗi 'sort' truyền từ frontend để đổi cách sắp xếp
+        if ("price-asc".equals(sort)) {
+            sortOrder = Sort.by("price").ascending();   // Giá tăng dần
+        } else if ("price-desc".equals(sort)) {
+            sortOrder = Sort.by("price").descending();  // Giá giảm dần
+        } else if ("rating".equals(sort)) {
+            // Vì averageRating là trường @Formula nên Hibernate tự hiểu và sort trong SQL được luôn!
+            sortOrder = Sort.by("averageRating").descending(); // Đánh giá cao nhất
+        } else if ("name-asc".equals(sort)) {
+            sortOrder = Sort.by("name").ascending();    // Tên từ A đến Z
+        } else if ("name-desc".equals(sort)) {
+            sortOrder = Sort.by("name").descending();   // Tên từ Z đến A
+        }
+
+        // Khởi tạo đối tượng Pageable
+        Pageable pageable = PageRequest.of(page, size, sortOrder);
+
+        Integer filterColor = (colorId != null && colorId > 0) ? colorId : null;
+        Integer filterMaterial = (materialId != null && materialId > 0) ? materialId : null;
+        Integer filterMaxPrice = (maxPrice != null && maxPrice > 0) ? maxPrice : null;
+
+        // Lấy Page<Product> từ Database
+        Page<Product> productPage = productRepository.findByMultiFilters(filterColor, filterMaterial, filterMaxPrice, pageable);
+
+        return productPage.map(this::convertToDTO);
     }
 
     private ProductDTO convertToDTO(Product product) {
