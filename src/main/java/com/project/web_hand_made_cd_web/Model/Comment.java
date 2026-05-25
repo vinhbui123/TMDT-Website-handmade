@@ -1,53 +1,32 @@
 package com.project.web_hand_made_cd_web.Model;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @Column(name = "product_id")
-    private int productId;
+    private Integer id;
 
     @Column(name = "user_id")
-    private int userId;
+    private Integer userId;
 
-    @Column(name = "rating")
-    private int rating;
+    private Integer rating;
 
-    @Column(name = "comment")
     private String comment;
 
-    @CreationTimestamp
-    @Column(name = "create_at", updatable = false)
-    private Date createAt;
+    @Column(name = "create_at")
+    private LocalDateTime createAt;
 
-    @Column(name = "updated_at", insertable = false, updatable = false)
-    private Date updatedAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    private User user;
-
-    @Transient
-    private String userName;
-
-    public String getUserName() {
-        if (this.userName != null) return this.userName;
-        return this.user != null ? this.user.getUsername() : "Anonymous";
-    }
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 }
