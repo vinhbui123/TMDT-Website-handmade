@@ -1,7 +1,9 @@
 package com.project.web_hand_made_cd_web.Service;
 
 import com.project.web_hand_made_cd_web.Model.Product;
+import com.project.web_hand_made_cd_web.Model.Comment;
 import com.project.web_hand_made_cd_web.Repository.ProductRepository;
+import com.project.web_hand_made_cd_web.Repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CommentRepository commentRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -52,5 +55,20 @@ public class ProductService {
 
     public List<Product> getTopRated() {
         return productRepository.findTopRated();
+    }
+
+    public List<Comment> getCommentsByProductId(int productId) {
+        return commentRepository.findByProductIdOrderByCreateAtDesc(productId);
+    }
+
+    public Comment addComment(Comment comment) {
+        Comment existing = commentRepository.findByProductIdAndUserId(comment.getProductId(), comment.getUserId());
+        if (existing != null) {
+            existing.setRating(comment.getRating());
+            existing.setComment(comment.getComment());
+            existing.setCreateAt(new java.util.Date()); // Update timestamp
+            return commentRepository.save(existing);
+        }
+        return commentRepository.save(comment);
     }
 }

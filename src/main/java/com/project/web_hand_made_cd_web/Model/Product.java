@@ -42,7 +42,9 @@ public class Product {
     @Column(name = "updated_at")
     private Date updated_at;
 
-    @Transient
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "img_path")
     private List<String> subImg;
 
     // Lấy thông tin từ bảng inventory thông qua relationship

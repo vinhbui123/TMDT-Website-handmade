@@ -10,6 +10,7 @@ import CartPage from './pages/CartPage'
 import Checkout from './pages/Checkout'
 import VNPayReturn from './components/VNPayReturn'
 import OrderHistory from './pages/OrderHistory'
+import ProductDetail from './pages/ProductDetail'
 
 // --- Các trang của Vinh (Incoming) ---
 import Login from './components/Login'
@@ -167,6 +168,7 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/vnpay-return" element={<VNPayReturn />} />
               <Route path="/order-history" element={<OrderHistory />} />
+              <Route path="/product/:id" element={<ProductDetail user={user} updateCartCount={updateCartCount} />} />
             </Routes>
           </main>
 
