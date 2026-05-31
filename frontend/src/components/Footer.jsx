@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="footer-container">
         <div className="footer-grid">
           <div className="footer-content">
-            <h3 className="footer-heading">HAND MADE CRAFT</h3>
+            <h3 className="footer-heading">HANDMADE SHOP</h3>
             <p className="footer-desc" style={{ marginBottom: '16px' }}>
               Sản phẩm mang tính thủ công đem đến sự mộc mạc giản dị mang một chất riêng
             </p>
@@ -64,7 +64,7 @@ const Footer = () => {
 
         <div className="footer-bottom">
           <div className="text-copyright">
-            Copy Right @ {new Date().getFullYear()} HAND MADE CRAFT Powered
+            Copy Right @ {new Date().getFullYear()} HANDMADE SHOP Powered
           </div>
           <div className="footer-tech">
             <span>React</span>

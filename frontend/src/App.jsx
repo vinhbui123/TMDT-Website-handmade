@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Banner from './components/Banner'
 import ProductList from './components/ProductList'
 import Footer from './components/Footer'
+import Chatbot from './components/Chatbot'
 
 // --- Các trang của bạn (HEAD) ---
 import CartPage from './pages/CartPage'
@@ -11,6 +12,7 @@ import Checkout from './pages/Checkout'
 import VNPayReturn from './components/VNPayReturn'
 import OrderHistory from './pages/OrderHistory'
 import ProductDetail from './pages/ProductDetail'
+import ShopDashboard from "./pages/ShopDashboard.jsx";
 
 // --- Các trang của Vinh (Incoming) ---
 import Login from './components/Login'
@@ -170,12 +172,13 @@ function App() {
               <Route path="/vnpay-return" element={<VNPayReturn />} />
               <Route path="/order-history" element={<OrderHistory />} />
               <Route path="/product/:id" element={<ProductDetail user={user} updateCartCount={updateCartCount} />} />
-
               <Route path="/products" element={<ProductCategoryList />} />
+                <Route path="/ShopDashBoard" element={<ShopDashboard />} />
             </Routes>
           </main>
 
           <Footer />
+          <Chatbot />
         </div>
       </Router>
   )
