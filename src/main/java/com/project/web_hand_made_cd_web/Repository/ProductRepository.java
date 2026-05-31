@@ -1,6 +1,7 @@
 package com.project.web_hand_made_cd_web.Repository;
 
 import com.project.web_hand_made_cd_web.Model.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -48,4 +49,20 @@ public interface ProductRepository extends JpaRepository<Product, Integer> { // 
             "HAVING AVG(c.rating) > 4 " +
             "ORDER BY AVG(c.rating) DESC", nativeQuery = true)
     List<Product> findTopRated();
+
+    // Tìm kiếm phân trang tất cả sản phẩm (đã có sẵn)
+    Page<Product> findAll(Pageable pageable);
+
+    // Lọc sản phẩm theo ID của Màu sắc và Danh mục (có phân trang)
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN p.colors c " +
+            "LEFT JOIN p.materials m " +
+            "WHERE (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+            "AND (:colorId IS NULL OR c.id = :colorId) " +
+            "AND (:materialId IS NULL OR m.id = :materialId)")
+    Page<Product> findByMultiFilters(
+            @Param("colorId") Integer colorId,
+            @Param("materialId") Integer materialId,
+            @Param("maxPrice") Integer maxPrice,
+            Pageable pageable);
 }

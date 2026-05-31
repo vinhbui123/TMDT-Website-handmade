@@ -1,0 +1,357 @@
+/* Tổng quan layout chính của trang Shop */
+.shop-handmade-container {
+  display: grid;
+  grid-template-columns: 280px 1fr; /* Cột trái cố định 280px, cột phải chiếm phần còn lại */
+  gap: 40px;
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+  background-color: #fbfaf7; /* Nền kem nhạt ấm áp chuẩn handmade */
+}
+
+/* ================= CỘT TRÁI (SIDEBAR FILTERS) ================= */
+.shop-sidebar {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(110, 78, 55, 0.05); /* Shadow mịn màu nâu đất nhạt */
+  height: fit-content;
+}
+
+.filter-group {
+  margin-bottom: 35px;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #5c4033; /* Màu nâu đậm mộc mạc */
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f3eae1;
+}
+
+.filter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-list li {
+  font-size: 14px;
+  padding: 8px 0;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.filter-list li span {
+  color: #b8a99a;
+}
+
+.filter-list li:hover, .filter-list li.active {
+  color: #c97a3e; /* Màu cam đất nhấn khi hoạt động */
+  font-weight: 500;
+}
+
+/* Thanh trượt chọn giá tiện ích */
+.price-slider-mock {
+  padding-top: 10px;
+}
+
+.price-slider-mock .slider {
+  width: 100%;
+  accent-color: #c97a3e;
+  margin-bottom: 12px;
+}
+
+.price-range-text {
+  font-size: 13px;
+  color: #5c4033;
+}
+
+/* Bộ lọc các chấm màu sắc */
+.color-filter-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.color-dot:hover {
+  transform: scale(1.15);
+}
+
+
+/* ================= CỘT PHẢI (MAIN CONTENT & GRID) ================= */
+.shop-main-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toolbar sắp xếp phía trên đầu */
+.shop-top-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  background-color: #ffffff;
+  padding: 15px 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.results-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.handmade-select {
+  /* Xóa bỏ hoàn toàn mũi tên mặc định của trình duyệt */
+  -webkit-appearance: none;  /* Dành cho Chrome, Safari, Edge */
+  -moz-appearance: none;     /* Dành cho Firefox */
+  appearance: none;          /* Chuẩn hiện đại */
+
+  padding: 8px 30px 8px 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a4a4a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  
+  background-position: right 12px center;
+  background-size: 16px;
+  
+  transition: border-color 0.2s ease;
+}
+
+/* Hiệu ứng khi người dùng click vào ô chọn */
+.handmade-select:focus {
+  border-color: #a18a68;
+}
+
+/* Layout Lưới thiết kế: Chia 3 cột sản phẩm */
+.products-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 cột bằng nhau */
+  gap: 25px;
+}
+
+/* Card Sản phẩm chi tiết */
+.handmade-product-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.handmade-product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(110, 78, 55, 0.1);
+}
+
+.card-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  position: relative;
+  background-color: #fcfbf9;
+}
+
+.card-image-wrapper img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  object-position: center;
+  display: block;
+}
+
+.wishlist-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #ffffff;
+  border: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #b8a99a;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.wishlist-btn:hover {
+  color: #e74c3c;
+  transform: scale(1.05);
+}
+
+.card-info {
+  padding: 20px;
+}
+
+.prod-category {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #b8a99a;
+  letter-spacing: 1px;
+  margin: 0 0 5px 0;
+}
+
+.prod-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #444;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  height: 42px; /* Đảm bảo tên dài 2 dòng không bị lệch layout */
+  overflow: hidden;
+}
+
+.prod-rating {
+  display: flex;
+  color: #ffa800;
+  margin-bottom: 12px;
+}
+
+.star-icon {
+  font-size: 16px;
+}
+
+.prod-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c97a3e;
+  margin: 0;
+}
+
+
+/* ================= BANNER QUẢNG CÁO XEN KẼ ================= */
+.handmade-shop-adv-banner {
+  /* Ép thuộc tính giúp banner chiếm trọn bề ngang từ cột 1 tới cột cuối của Grid lưới */
+  grid-column: 1 / -1; 
+  
+  background: linear-gradient(135deg, #f4ebe1 0%, #e8d5c4 100%);
+  border-radius: 10px;
+  padding: 30px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  border-left: 5px solid #c97a3e;
+}
+
+.banner-text h3 {
+  margin: 0 0 8px 0;
+  color: #5c4033;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.banner-text p {
+  margin: 0;
+  color: #7c6455;
+  font-size: 14px;
+}
+
+.banner-action-btn {
+  background-color: #c97a3e;
+  color: #ffffff;
+  border: none;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.banner-action-btn:hover {
+  background-color: #a65f2b;
+}
+
+
+/* ================= THANH PHÂN TRANG (PAGINATION) ================= */
+.handmade-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.pag-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #ffffff;
+  border: 1px solid #e1d7ce;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #5c4033;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pag-btn:disabled {
+  color: #c8b9ad;
+  cursor: not-allowed;
+  background-color: #f7f5f2;
+}
+
+.pag-number {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e1d7ce;
+  background-color: #ffffff;
+  color: #5c4033;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.pag-number:hover, .pag-number.active {
+  background-color: #c97a3e;
+  color: #ffffff;
+  border-color: #c97a3e;
+}
