@@ -20,7 +20,10 @@ const Login = () => {
             setSuccess('Đăng nhập thành công!');
             localStorage.setItem('user', JSON.stringify(data.user));
             window.dispatchEvent(new Event('storage'));
-            setTimeout(() => navigate('/'), 1000);
+
+            // Redirect shop owners (role === 2) to shop dashboard
+            const redirectPath = data.user.role === 2 ? '/ShopDashBoard' : '/';
+            setTimeout(() => navigate(redirectPath), 1000);
         } else {
             setError(data.message || 'Đăng nhập thất bại.');
         }
