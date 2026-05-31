@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.config;
+package com.project.web_hand_made_TMDT.Config;
 
 import java.io.PrintWriter;
 

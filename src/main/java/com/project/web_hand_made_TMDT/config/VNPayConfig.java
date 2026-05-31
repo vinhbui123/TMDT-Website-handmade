@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.config;
+package com.project.web_hand_made_TMDT.Config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import javax.crypto.Mac;

@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.controller;
+package com.project.web_hand_made_TMDT.Controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

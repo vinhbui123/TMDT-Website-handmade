@@ -1,13 +1,17 @@
-package com.project.web_hand_made_TMDT.controller;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import com.project.web_hand_made_TMDT.Service.ChatbotService;
+package com.project.web_hand_made_TMDT.Controller;
 
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.web_hand_made_TMDT.Service.ChatbotService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/chatbot")

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.project.web_hand_made_TMDT.config.VNPayConfig;
+import com.project.web_hand_made_TMDT.Config.VNPayConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

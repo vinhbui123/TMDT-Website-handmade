@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WebHandMadeCdWebApplication {
+public class WebHandMadeTMDTApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WebHandMadeCdWebApplication.class, args);
+		SpringApplication.run(WebHandMadeTMDTApplication.class, args);
 	}
 
 }
