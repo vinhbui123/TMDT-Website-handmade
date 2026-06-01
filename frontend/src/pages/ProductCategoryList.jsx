@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { getProducts } from "../services/api";
 import "../assets/css/ProductCategoryList.css";
 
 function ProductCategoryList() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const keywordFromUrl = searchParams.get('keyword') || null;
+
   // STATE QUẢN LÝ DỮ LIỆU THỰC
   const [products, setProducts] = useState([]);       // Danh sách sản phẩm thực từ API
   const [loading, setLoading] = useState(true);       // Trạng thái đang tải dữ liệu
@@ -71,7 +76,7 @@ function ProductCategoryList() {
       setError(null);
       try {
         // Lưu ý: Backend Spring Boot thường tính trang từ số 0, nên ta truyền (currentPage - 1)
-        const data = await getProducts(currentPage - 1, pageSize, sortBy, selectedColor, selectedMaterial, appliedMaxPrice);
+        const data = await getProducts(currentPage - 1, pageSize, sortBy, selectedColor, selectedMaterial, appliedMaxPrice, keywordFromUrl);
 
         setProducts(data.content || []);     // Đổ mảng sản phẩm vào state
         setTotalPages(data.totalPages || 1); // Đổ tổng số trang vào state để vẽ thanh phân trang
@@ -83,7 +88,7 @@ function ProductCategoryList() {
     };
 
     fetchApiData();
-  }, [currentPage, sortBy, selectedColor, selectedMaterial, appliedMaxPrice]);
+  }, [currentPage, sortBy, selectedColor, selectedMaterial, appliedMaxPrice, keywordFromUrl]);
 
   // Hàm xử lý logic chèn Banner quảng cáo sau mỗi 6 sản phẩm
   const renderProductsWithBanners = () => {

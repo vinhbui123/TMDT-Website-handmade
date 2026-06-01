@@ -45,8 +45,9 @@ public class ProductController {
             @RequestParam(value = "sort", defaultValue = "default") String sort,
             @RequestParam(value = "colorId", required = false) Integer colorId,
             @RequestParam(value = "materialId", required = false) Integer materialId,
-            @RequestParam(value = "maxPrice", required = false) Integer maxPrice) {
-        return productService.getProductsPaginated(page, size, sort, colorId, materialId, maxPrice);
+            @RequestParam(value = "maxPrice", required = false) Integer maxPrice,
+            @RequestParam(value = "keyword", required = false) String keyword) {
+        return productService.getProductsPaginated(page, size, sort, colorId, materialId, maxPrice, keyword);
     }
 
     @GetMapping("/products/search")

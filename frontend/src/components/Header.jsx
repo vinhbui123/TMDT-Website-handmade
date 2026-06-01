@@ -12,8 +12,10 @@ function Header({ user, categories, cartCount }) {
   const [appliedKeyword, setAppliedKeyword] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
   const searchRef = useRef(null);
+  const accountRef = useRef(null);
 
   const handleLogout = async (e) => {
     e.preventDefault()
@@ -33,6 +35,9 @@ function Header({ user, categories, cartCount }) {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowDropdown(false);
+      }
+      if (accountRef.current && !accountRef.current.contains(event.target)) {
+        setShowAccountMenu(false);
       }
     };
 
@@ -76,6 +81,11 @@ function Header({ user, categories, cartCount }) {
     setShowDropdown(false); // Đóng dropdown đi
 
     setAppliedKeyword(inputKeyword);
+    if (inputKeyword.trim()) {
+      navigate(`/products?keyword=${encodeURIComponent(inputKeyword.trim())}`);
+    } else {
+      navigate('/products');
+    }
   };
 
   return (
@@ -89,53 +99,6 @@ function Header({ user, categories, cartCount }) {
             </a>
           </div>
 
-          {/* Account */}
-          <div className="header-account">
-            <span className="account-icon">
-              {user ? (
-                <a href="/profile">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt="Avatar"
-                      className="avatar-img"
-                      style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }}
-                      onError={(e) => { e.target.src = '/images/default-avatar.png' }}
-                    />
-                  ) : (
-                    <i className="fas fa-user" style={{ fontSize: '36px' }}></i>
-                  )}
-                </a>
-              ) : (
-                <a href="/login"><i className="fas fa-user" style={{ fontSize: '36px' }}></i></a>
-              )}
-            </span>
-            <div className="account-info">
-              {user ? (
-                <>
-                  <span className="account-text">
-                    Xin chào, {user.firstName} {user.lastName}!
-                  </span>
-                  <a href="/change-password">
-                    <span className="account-menu">Đổi mật khẩu</span>
-                  </a>
-                  <a href="#" onClick={handleLogout}>
-                    <span className="account-menu">
-                      Đăng Xuất <i className="fas fa-sign-out-alt"></i>
-                    </span>
-                  </a>
-                </>
-              ) : (
-                <>
-                  <span>Xin Chào khách hàng</span>
-                  <span className="account-text">
-                    <a href="/login">Đăng Nhập</a> / <a href="/register">Đăng Ký</a>
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-
           {/* Search */}
           <div className="header-search">
             <div className="search-box">
@@ -147,7 +110,7 @@ function Header({ user, categories, cartCount }) {
                   onFocus={() => {
                     if (suggestions.length > 0) setShowDropdown(true)
                   }}
-                  placeholder="Tìm Kiếm Sản Phẩm"
+                  placeholder="Tìm kiếm sản phẩm..."
                   required
                 />
                 <button type="submit"><i className="fas fa-search"></i></button>
@@ -158,7 +121,7 @@ function Header({ user, categories, cartCount }) {
                     {suggestions.map((prod) => (
                       <Link
                         key={prod.id}
-                        to={`/product-detail/${prod.id}`}
+                        to={`/product/${prod.id}`}
                         className="search-dropdown-item"
                         onClick={() => setShowDropdown(false)}
                       >
@@ -177,24 +140,120 @@ function Header({ user, categories, cartCount }) {
 
           {/* Actions */}
           <div className="header-action">
-            <div className="header-cart" onClick={() => window.location.href = '/cart'}>
-              <i className="fas fa-cart-shopping"></i>
-              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-              <span className="cart-text">Giỏ Hàng</span>
+            {/* Seller Dashboard Button */}
+            {user && user.role === 2 && (
+              <a href="/ShopDashBoard" className="header-role-btn seller-btn" id="seller-dashboard-btn">
+                <i className="fa-solid fa-store"></i>
+                <span>Kênh Người Bán</span>
+              </a>
+            )}
+
+            {/* Admin Button */}
+            {user && user.role === 1 && (
+              <a href="/adminProducts" className="header-role-btn admin-btn">
+                <i className="fa-solid fa-user-tie"></i>
+                <span>Quản Trị</span>
+              </a>
+            )}
+
+            {/* Divider */}
+            {user && (user.role === 1 || user.role === 2) && (
+              <div className="header-divider"></div>
+            )}
+
+            {/* Cart */}
+            <div className="header-action-item" onClick={() => window.location.href = '/cart'}>
+              <div className="action-icon-wrap">
+                <i className="fas fa-cart-shopping"></i>
+                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+              </div>
+              <span className="action-label">Giỏ Hàng</span>
             </div>
 
+            {/* Orders */}
             {user && (
-              <div className="header-purchase" onClick={() => window.location.href = '/order-history'}>
-                <i className="fas fa-receipt"></i>
-                <span className="cart-text">Đơn Mua</span>
+              <div className="header-action-item" onClick={() => window.location.href = '/order-history'}>
+                <div className="action-icon-wrap">
+                  <i className="fas fa-receipt"></i>
+                </div>
+                <span className="action-label">Đơn Mua</span>
               </div>
             )}
 
-            {user && user.role === 1 && (
-              <a href="/adminProducts" className="admin-btn">
-                <i className="fa-solid fa-user-tie"></i> Trang Quản Trị
-              </a>
-            )}
+            {/* Divider */}
+            <div className="header-divider"></div>
+
+            {/* Account */}
+            <div className="header-account" ref={accountRef}>
+              {user ? (
+                <>
+                  <div
+                    className="account-trigger"
+                    onClick={() => setShowAccountMenu(!showAccountMenu)}
+                  >
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt="Avatar"
+                        className="avatar-img"
+                        onError={(e) => { e.target.src = '/images/default-avatar.png' }}
+                      />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        <i className="fas fa-user"></i>
+                      </div>
+                    )}
+                    <div className="account-brief">
+                      <span className="account-name">{user.firstName} {user.lastName}</span>
+                      <i className={`fas fa-chevron-down account-arrow ${showAccountMenu ? 'open' : ''}`}></i>
+                    </div>
+                  </div>
+
+                  {/* Account Dropdown */}
+                  {showAccountMenu && (
+                    <div className="account-dropdown">
+                      <div className="account-dropdown-header">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt="Avatar"
+                            className="dropdown-avatar"
+                            onError={(e) => { e.target.src = '/images/default-avatar.png' }}
+                          />
+                        ) : (
+                          <div className="dropdown-avatar-placeholder">
+                            <i className="fas fa-user"></i>
+                          </div>
+                        )}
+                        <div>
+                          <span className="dropdown-name">{user.firstName} {user.lastName}</span>
+                          <span className="dropdown-email">{user.email}</span>
+                        </div>
+                      </div>
+                      <div className="account-dropdown-divider"></div>
+                      <a href="/profile" className="account-dropdown-item">
+                        <i className="fas fa-user-circle"></i>
+                        Tài khoản của tôi
+                      </a>
+                      <a href="/change-password" className="account-dropdown-item">
+                        <i className="fas fa-key"></i>
+                        Đổi mật khẩu
+                      </a>
+                      <div className="account-dropdown-divider"></div>
+                      <a href="#" onClick={handleLogout} className="account-dropdown-item logout-item">
+                        <i className="fas fa-sign-out-alt"></i>
+                        Đăng Xuất
+                      </a>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="account-guest">
+                  <a href="/login" className="btn-login">Đăng Nhập</a>
+                  <a href="/register" className="btn-register">Đăng Ký</a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
