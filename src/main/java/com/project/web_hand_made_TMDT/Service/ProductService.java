@@ -68,7 +68,7 @@ public class ProductService {
         return productRepository.findTopRated();
     }
 
-    public Page<ProductDTO> getProductsPaginated(int page, int size, String sort, Integer colorId, Integer materialId, Integer maxPrice) {
+    public Page<ProductDTO> getProductsPaginated(int page, int size, String sort, Integer colorId, Integer materialId, Integer maxPrice, String keyword) {
         // Mặc định sắp xếp theo ID giảm dần (Sản phẩm mới nhất)
         Sort sortOrder = Sort.by("id").descending();
 
@@ -92,9 +92,10 @@ public class ProductService {
         Integer filterColor = (colorId != null && colorId > 0) ? colorId : null;
         Integer filterMaterial = (materialId != null && materialId > 0) ? materialId : null;
         Integer filterMaxPrice = (maxPrice != null && maxPrice > 0) ? maxPrice : null;
+        String filterKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
 
         // Lấy Page<Product> từ Database
-        Page<Product> productPage = productRepository.findByMultiFilters(filterColor, filterMaterial, filterMaxPrice, pageable);
+        Page<Product> productPage = productRepository.findByMultiFilters(filterColor, filterMaterial, filterMaxPrice, filterKeyword, pageable);
 
         return productPage.map(this::convertToDTO);
     }

@@ -316,7 +316,7 @@ export default function ShopDashboard() {
                                         <div key={o.id} className="order-card">
                                             <div className="order-info">
                                                 <h3>Đơn hàng #{o.id}</h3>
-                                                <p>Khách hàng ID: {o.userId} • Đặt lúc: {o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                                                <p>Khách hàng: {o.customerName || ('KH #' + o.userId)} • Đặt lúc: {o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</p>
                                             </div>
                                             <div className="order-actions">
                                                 <span className={`status-badge ${getStatusClass(o.status)}`}>

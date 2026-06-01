@@ -60,10 +60,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> { // 
             "LEFT JOIN p.materials m " +
             "WHERE (:maxPrice IS NULL OR p.price <= :maxPrice) " +
             "AND (:colorId IS NULL OR c.id = :colorId) " +
-            "AND (:materialId IS NULL OR m.id = :materialId)")
+            "AND (:materialId IS NULL OR m.id = :materialId) " +
+            "AND (:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> findByMultiFilters(
             @Param("colorId") Integer colorId,
             @Param("materialId") Integer materialId,
             @Param("maxPrice") Integer maxPrice,
+            @Param("keyword") String keyword,
             Pageable pageable);
 }

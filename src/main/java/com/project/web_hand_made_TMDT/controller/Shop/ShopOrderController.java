@@ -1,7 +1,9 @@
 package com.project.web_hand_made_TMDT.Controller.Shop;
 
 import com.project.web_hand_made_TMDT.Model.Order;
+import com.project.web_hand_made_TMDT.Model.User;
 import com.project.web_hand_made_TMDT.Repository.OrderRepository;
+import com.project.web_hand_made_TMDT.Repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,8 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/shop/orders")
@@ -19,9 +21,11 @@ import java.util.Map;
 public class ShopOrderController {
 
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
     /**
      * Lấy danh sách đơn hàng theo userId của shop owner đang đăng nhập.
+     * Trả về thêm trường customerName cho mỗi đơn hàng.
      */
     @GetMapping
     public ResponseEntity<?> getShopOrders(HttpServletRequest request) {
@@ -34,7 +38,35 @@ public class ShopOrderController {
         }
 
         List<Order> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        return ResponseEntity.ok(orders);
+
+        // Thu thập tất cả userId duy nhất từ các đơn hàng
+        Set<Integer> userIds = orders.stream()
+                .map(Order::getUserId)
+                .collect(Collectors.toSet());
+
+        // Lấy tất cả User tương ứng và tạo map id -> tên
+        Map<Integer, String> userNameMap = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(
+                        User::getId,
+                        u -> (u.getFirstName() != null ? u.getFirstName() : "") + " " + (u.getLastName() != null ? u.getLastName() : "")
+                ));
+
+        // Map mỗi đơn hàng thành response có thêm customerName
+        List<Map<String, Object>> result = orders.stream().map(o -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", o.getId());
+            map.put("status", o.getStatus());
+            map.put("userId", o.getUserId());
+            map.put("customerName", userNameMap.getOrDefault(o.getUserId(), "Khách hàng #" + o.getUserId()));
+            map.put("freeShipping", o.isFreeShipping());
+            map.put("paymentTypeId", o.getPaymentTypeId());
+            map.put("createdAt", o.getCreatedAt());
+            map.put("updatedAt", o.getUpdatedAt());
+            map.put("orderDetails", o.getOrderDetails());
+            return map;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
     }
 
     /**
