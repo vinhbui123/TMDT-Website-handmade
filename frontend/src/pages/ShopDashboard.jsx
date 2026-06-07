@@ -46,8 +46,8 @@ export default function ShopDashboard() {
             }))
             .catch(() => console.log('Không tải được Profile'));
 
-        // Fetch Sản phẩm — lấy tất cả sản phẩm
-        fetch('/api/products', { credentials: 'include' })
+        // Fetch Sản phẩm — lấy sản phẩm của shop hiện tại
+        fetch('/api/shop/products', { credentials: 'include' })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -108,7 +108,7 @@ export default function ShopDashboard() {
                 alert('Lưu sản phẩm thành công!');
                 setIsModalOpen(false);
                 // Refresh products
-                const refreshRes = await fetch('/api/products', { credentials: 'include' });
+                const refreshRes = await fetch('/api/shop/products', { credentials: 'include' });
                 if (refreshRes.ok) {
                     const data = await refreshRes.json();
                     if (Array.isArray(data)) setProducts(data);
@@ -239,7 +239,7 @@ export default function ShopDashboard() {
                                             setIsModalOpen(true);
                                         }}
                                     >
-                                        + Thêm tác phẩm mới
+                                        + Thêm sản phẩm mới
                                     </button>
                                 </div>
 
