@@ -7,7 +7,7 @@ export default function ShopDashboard() {
     // --- STATES ---
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
-    const [profile, setProfile] = useState({ lastName: '', bio: '', phoneNumber: '', address: '' });
+    const [profile, setProfile] = useState({ shopName: '', description: '', phoneNumber: '', shopAddress: '' });
     const [loading, setLoading] = useState(true);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,13 +36,13 @@ export default function ShopDashboard() {
         setLoading(true);
 
         // Fetch Hồ sơ
-        fetch(`/api/shop/profile/${shopId}`, { credentials: 'include' })
+        fetch(`/api/shop/profile/me`, { credentials: 'include' })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => setProfile({
-                lastName: data.lastName || '',
-                bio: data.bio || '',
+                shopName: data.shopName || '',
+                description: data.description || '',
                 phoneNumber: data.phoneNumber || '',
-                address: data.address || ''
+                shopAddress: data.shopAddress || ''
             }))
             .catch(() => console.log('Không tải được Profile'));
 
@@ -147,7 +147,7 @@ export default function ShopDashboard() {
     const handleSaveProfile = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`/api/shop/profile/${shopId}`, {
+            const res = await fetch(`/api/shop/profile/me`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -200,7 +200,7 @@ export default function ShopDashboard() {
             <header className="shop-header">
                 <div className="shop-header-inner">
                     <div className="shop-header-title">
-                        <h1>Shop của {profile.lastName || 'Bạn'}</h1>
+                        <h1>{profile.shopName || 'Shop của Bạn'}</h1>
                         <p>Quản lý không gian sáng tạo của bạn</p>
                     </div>
                     <nav className="shop-tab-nav">
@@ -355,8 +355,8 @@ export default function ShopDashboard() {
                                             <label>Tên shop Handmade</label>
                                             <input
                                                 type="text"
-                                                value={profile.lastName}
-                                                onChange={e => setProfile({ ...profile, lastName: e.target.value })}
+                                                value={profile.shopName}
+                                                onChange={e => setProfile({ ...profile, shopName: e.target.value })}
                                                 required
                                             />
                                         </div>
@@ -372,16 +372,16 @@ export default function ShopDashboard() {
                                             <label>Địa chỉ</label>
                                             <input
                                                 type="text"
-                                                value={profile.address}
-                                                onChange={e => setProfile({ ...profile, address: e.target.value })}
+                                                value={profile.shopAddress}
+                                                onChange={e => setProfile({ ...profile, shopAddress: e.target.value })}
                                             />
                                         </div>
                                         <div className="shop-form-group">
                                             <label>Câu chuyện / Mô tả cửa hàng</label>
                                             <textarea
                                                 rows="4"
-                                                value={profile.bio}
-                                                onChange={e => setProfile({ ...profile, bio: e.target.value })}
+                                                value={profile.description}
+                                                onChange={e => setProfile({ ...profile, description: e.target.value })}
                                                 placeholder="Chia sẻ tâm huyết về các sản phẩm thủ công của bạn..."
                                             />
                                         </div>

@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.util.Map;
 
@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Model.Cart;
-import com.project.web_hand_made_TMDT.Service.CartService;
+import com.project.web_hand_made_TMDT.model.Cart;
+import com.project.web_hand_made_TMDT.service.CartService;
 
 @RestController
 @RequestMapping("/api/cart")
 // Đảm bảo port 5001 hoặc 5173 khớp với React của bạn
-@CrossOrigin(origins = "http://localhost:5001", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class CartController {
     private final CartService cartService;
 
@@ -39,7 +39,7 @@ public class CartController {
                     "success", true,
                     "cartCount", cart.getTotalQuantity() // Trả về tổng số lượng (ví dụ: 2 táo + 1 cam = 3)
             ));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
@@ -53,8 +53,7 @@ public class CartController {
                     "success", true,
                     "items", cart.getItems(),
                     "total", cart.calculateTotal(),
-                    "cartCount", cart.getTotalQuantity()
-            ));
+                    "cartCount", cart.getTotalQuantity()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("success", false, "message", e.getMessage()));
         }
@@ -68,12 +67,12 @@ public class CartController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Đã xóa toàn bộ giỏ hàng",
-                    "cartCount", 0
-            ));
+                    "cartCount", 0));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
     @PostMapping("/update")
     public ResponseEntity<?> updateCart(@RequestBody Map<String, Object> request) {
         try {
@@ -86,9 +85,8 @@ public class CartController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "cartCount", cart.getTotalQuantity(),
-                    "total", cart.calculateTotal()
-            ));
-        } catch (Exception e) {
+                    "total", cart.calculateTotal()));
+        } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
@@ -99,8 +97,7 @@ public class CartController {
             Cart cart = cartService.removeProductFromCart(productId);
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "cartCount", cart.getTotalQuantity()
-            ));
+                    "cartCount", cart.getTotalQuantity()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false));
         }

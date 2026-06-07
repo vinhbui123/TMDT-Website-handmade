@@ -1,11 +1,20 @@
-package com.project.web_hand_made_TMDT.Config;
+package com.project.web_hand_made_TMDT.config;
 
-import jakarta.servlet.http.HttpServletRequest;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class VNPayConfig {
 
@@ -29,7 +38,7 @@ public class VNPayConfig {
                     // Hiện ra màn hình từng cặp tham số đã encode
                     System.out.println("Field: " + fieldName + " => " + encodedValue);
 
-                } catch (Exception e) {
+                } catch (UnsupportedEncodingException e) {
                     sb.append(fieldValue);
                 }
                 if (itr.hasNext()) sb.append("&");
@@ -63,7 +72,7 @@ public class VNPayConfig {
                 sb.append(String.format("%02x", b & 0xff));
             }
             return sb.toString();
-        } catch (Exception ex) {
+        } catch (IllegalStateException | InvalidKeyException | NoSuchAlgorithmException ex) {
             System.err.println("LỖI KHI MÃ HÓA SHA512: " + ex.getMessage());
             return "";
         }

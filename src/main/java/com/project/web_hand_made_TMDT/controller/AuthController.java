@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.util.Map;
 
@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Dto.AuthResponse;
-import com.project.web_hand_made_TMDT.Dto.LoginRequest;
-import com.project.web_hand_made_TMDT.Dto.RegisterRequest;
-import com.project.web_hand_made_TMDT.Dto.SocialLoginRequest;
-import com.project.web_hand_made_TMDT.Model.User;
-import com.project.web_hand_made_TMDT.Service.AuthService;
-import com.project.web_hand_made_TMDT.Service.EmailService;
-import com.project.web_hand_made_TMDT.Service.OtpService;
-import com.project.web_hand_made_TMDT.Service.SessionManager;
-import com.project.web_hand_made_TMDT.Util.HashUtil;
+import com.project.web_hand_made_TMDT.dto.AuthResponse;
+import com.project.web_hand_made_TMDT.dto.LoginRequest;
+import com.project.web_hand_made_TMDT.dto.RegisterRequest;
+import com.project.web_hand_made_TMDT.dto.SocialLoginRequest;
+import com.project.web_hand_made_TMDT.model.User;
+import com.project.web_hand_made_TMDT.service.AuthService;
+import com.project.web_hand_made_TMDT.service.EmailService;
+import com.project.web_hand_made_TMDT.service.OtpService;
+import com.project.web_hand_made_TMDT.service.SessionManager;
+import com.project.web_hand_made_TMDT.util.HashUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
