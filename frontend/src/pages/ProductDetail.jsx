@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../assets/css/ProductDetail.css';
+import { 
+    KeychainCustomizer, 
+    GiftComboCustomizer, 
+    WoolFlowerCustomizer, 
+    AccessoryCustomizer 
+} from '../components/CustomizerFields';
 
 const ProductDetail = ({ user, updateCartCount }) => {
     const { id } = useParams();
@@ -13,6 +19,9 @@ const ProductDetail = ({ user, updateCartCount }) => {
     const [mainImg, setMainImg] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(null);
+
+    // Lưu toàn bộ thông tin người dùng tùy chỉnh
+    const [customData, setCustomData] = useState({});
 
     // Review form state
     const [rating, setRating] = useState(5);
@@ -76,6 +85,27 @@ const ProductDetail = ({ user, updateCartCount }) => {
     const handleBuyNow = async () => {
         await handleAddToCart();
         navigate('/cart');
+    };
+
+    // HÀM XỬ LÝ RẼ NHÁNH GIAO DIỆN THEO CHẤT LIỆU
+    const renderCustomizerByCategory = () => {
+        // Kiểm tra xem sản phẩm có category không
+        if (!product?.catalog_id) return null;
+
+        const currentMaterials = product.materials || [];
+
+        switch (product.catalog_id) {
+            case 1:     // ID của Móc khóa
+                return <KeychainCustomizer customData={customData} setCustomData={setCustomData} materials={currentMaterials} />;
+            case 2:     // ID của Combo quà tặng
+                return <GiftComboCustomizer customData={customData} setCustomData={setCustomData} />;
+            case 3:     // ID của Hoa len
+                return <WoolFlowerCustomizer customData={customData} setCustomData={setCustomData} materials={currentMaterials} />;
+            case 4:     // ID của Phụ kiện
+                return <AccessoryCustomizer product={product} customData={customData} setCustomData={setCustomData} />;
+            default:
+                return null; // Các loại sản phẩm khác không cần customize
+        }
     };
 
     const submitReview = async (e) => {
@@ -187,6 +217,9 @@ const ProductDetail = ({ user, updateCartCount }) => {
                     <div className="stock-quantity">
                         Kho: {product.quantity}
                     </div>
+
+                    {/* HIỂN THỊ KHU VỰC CUSTOMIZE TÙY LOẠI */}
+                    {renderCustomizerByCategory()}
 
                     <div className="btn-box">
                         <button className="cart-btn" onClick={handleAddToCart}>

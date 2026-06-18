@@ -166,6 +166,7 @@
 
 /* Card Sản phẩm chi tiết */
 .handmade-product-card {
+  text-decoration: none;
   background-color: #ffffff;
   border-radius: 10px;
   overflow: hidden;

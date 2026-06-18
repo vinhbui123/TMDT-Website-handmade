@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { getProducts } from "../services/api";
 import "../assets/css/ProductCategoryList.css";
 
@@ -96,7 +96,7 @@ function ProductCategoryList() {
 
     products.forEach((product, index) => {
       renderedElements.push(
-        <div key={`prod-${product.id}`} className="handmade-product-card">
+        <Link key={`prod-${product.id}`} className="handmade-product-card" to={`/product/${product.id}`}>
           <div className="card-image-wrapper">
             {/* Đảm bảo đường dẫn ảnh khớp với thuộc tính trong DB của bạn (ví dụ: product.thumbnail hoặc product.image) */}
             <img
@@ -120,7 +120,7 @@ function ProductCategoryList() {
             </div>
             <p className="prod-price">{(product.price || 0).toLocaleString("vi-VN")}₫</p>
           </div>
-        </div>
+        </Link>
       );
 
       // Cứ sau 6 sản phẩm thì chèn 1 Banner quảng cáo xen kẽ
@@ -180,16 +180,6 @@ function ProductCategoryList() {
         </div>
 
         {/* Bộ lọc khoảng giá */}
-        {/* <div className="filter-group">
-          <h3 className="filter-title">Lọc Theo Giá</h3>
-          <div className="price-slider-mock">
-            <input type="range" min="0" max="1000000" defaultValue="500000" className="slider" />
-            <div className="price-range-text">
-              <span>0₫</span> — <span>1.000.000₫</span>
-            </div>
-          </div>
-        </div> */}
-
         <div className="filter-group">
           <h3 className="filter-title">Lọc Theo Giá</h3>
           <div className="price-slider-mock">
