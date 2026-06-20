@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../assets/css/ProductDetail.css';
-import { 
-    KeychainCustomizer, 
-    GiftComboCustomizer, 
-    WoolFlowerCustomizer, 
-    AccessoryCustomizer 
+import {
+    KeychainCustomizer,
+    GiftComboCustomizer,
+    WoolFlowerCustomizer,
+    AccessoryCustomizer
 } from '../components/CustomizerFields';
 
-const ProductDetail = ({ user, updateCartCount }) => {
+// CHỮA LỖI: Bỏ import ChatWidget tại đây vì nó đã được quản lý tập trung ở App.jsx rồi
+
+const ProductDetail = ({ user, updateCartCount, openChat }) => { // CHỮA LỖI: Thêm prop openChat nhận từ App.jsx
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
@@ -20,7 +22,9 @@ const ProductDetail = ({ user, updateCartCount }) => {
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(null);
 
-    // Lưu toàn bộ thông tin người dùng tùy chỉnh
+    // CHỮA LỖI: Xóa bỏ dòng state [isChatOpen, setIsChatOpen] ở đây
+
+    // Store customizer data
     const [customData, setCustomData] = useState({});
 
     // Review form state
@@ -63,17 +67,20 @@ const ProductDetail = ({ user, updateCartCount }) => {
 
     const handleAddToCart = async () => {
         try {
+            const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             const res = await fetch('/api/cart/add', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify({ productId: product.id, quantity })
             });
             const data = await res.json();
             if (data.success) {
                 alert('Thêm vào giỏ hàng thành công!');
                 if (updateCartCount) updateCartCount();
-                // Trigger event for App.jsx to update count if updateCartCount prop is not passed directly
-                window.dispatchEvent(new Event('cartUpdated')); 
+                window.dispatchEvent(new Event('cartUpdated'));
             } else {
                 alert(data.message || 'Lỗi khi thêm vào giỏ hàng');
             }
@@ -87,40 +94,41 @@ const ProductDetail = ({ user, updateCartCount }) => {
         navigate('/cart');
     };
 
-    // HÀM XỬ LÝ RẼ NHÁNH GIAO DIỆN THEO CHẤT LIỆU
     const renderCustomizerByCategory = () => {
-        // Kiểm tra xem sản phẩm có category không
         if (!product?.catalog_id) return null;
-
         const currentMaterials = product.materials || [];
 
         switch (product.catalog_id) {
-            case 1:     // ID của Móc khóa
+            case 1:
                 return <KeychainCustomizer customData={customData} setCustomData={setCustomData} materials={currentMaterials} />;
-            case 2:     // ID của Combo quà tặng
+            case 2:
                 return <GiftComboCustomizer customData={customData} setCustomData={setCustomData} />;
-            case 3:     // ID của Hoa len
+            case 3:
                 return <WoolFlowerCustomizer customData={customData} setCustomData={setCustomData} materials={currentMaterials} />;
-            case 4:     // ID của Phụ kiện
+            case 4:
                 return <AccessoryCustomizer product={product} customData={customData} setCustomData={setCustomData} />;
             default:
-                return null; // Các loại sản phẩm khác không cần customize
+                return null;
         }
     };
 
     const submitReview = async (e) => {
         e.preventDefault();
         try {
+            const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
             const res = await fetch(`/api/products/${id}/comments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify({ rating, comment: reviewContent })
             });
             if (res.ok) {
                 alert('Đánh giá của bạn đã được gửi!');
                 setReviewContent('');
                 setRating(5);
-                fetchComments(); // Reload comments
+                fetchComments();
             } else if (res.status === 401) {
                 alert('Vui lòng đăng nhập để đánh giá.');
             } else {
@@ -136,8 +144,7 @@ const ProductDetail = ({ user, updateCartCount }) => {
     if (!product) return null;
 
     const discountPrice = product.discount > 0 ? product.price * (1 - product.discount/100) : product.price;
-
-    const averageRating = comments.length > 0 
+    const averageRating = comments.length > 0
         ? (comments.reduce((sum, c) => sum + c.rating, 0) / comments.length).toFixed(1)
         : 0;
 
@@ -168,7 +175,7 @@ const ProductDetail = ({ user, updateCartCount }) => {
                         </ul>
                     </div>
                     <div className="name">{product.name}</div>
-                    
+
                     <div className="rating-overview-top" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
                         <div className="rating-stars" style={{ color: '#f27a24', fontSize: '14px' }}>
                             {[1, 2, 3, 4, 5].map(i => (
@@ -194,8 +201,8 @@ const ProductDetail = ({ user, updateCartCount }) => {
                     <div className="color-selector">
                         <p>Màu sắc :</p>
                         {product.colors && product.colors.map((color, idx) => (
-                            <div 
-                                key={idx} 
+                            <div
+                                key={idx}
                                 className={`color-item ${selectedColor?.id === color.id ? 'active' : ''}`}
                                 onClick={() => setSelectedColor(color)}
                             >
@@ -206,26 +213,50 @@ const ProductDetail = ({ user, updateCartCount }) => {
 
                     <div className="quantity">
                         <p>Số lượng :</p>
-                        <input 
-                            type="number" 
-                            min="1" 
-                            value={quantity} 
-                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} 
+                        <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                         />
                     </div>
-                    
+
                     <div className="stock-quantity">
                         Kho: {product.quantity}
                     </div>
 
-                    {/* HIỂN THỊ KHU VỰC CUSTOMIZE TÙY LOẠI */}
                     {renderCustomizerByCategory()}
 
-                    <div className="btn-box">
-                        <button className="cart-btn" onClick={handleAddToCart}>
+                    <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        {/* CHỮA LỖI: Gọi hàm openChat truyền ngược data sản phẩm lên App.jsx */}
+                        <button
+                            className="chat-now-btn"
+                            onClick={() => openChat && openChat(product)}
+                            style={{
+                                backgroundColor: 'rgba(238, 77, 45, 0.1)',
+                                color: '#ee4d2d',
+                                border: '1px solid #ee4d2d',
+                                padding: '0 15px',
+                                height: '48px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                minWidth: '95px',
+                                fontSize: '14px',
+                                gap: '2px'
+                            }}
+                        >
+                            <i className="far fa-comment-dots" style={{ fontSize: '18px' }}></i>
+                            <span>Chat ngay</span>
+                        </button>
+
+                        <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1 }}>
                             <i className="fa-solid fa-cart-plus" style={{marginRight: 5}}></i>Thêm Vào Giỏ Hàng
                         </button>
-                        <button className="buy-btn" onClick={handleBuyNow}>Mua Ngay</button>
+                        <button className="buy-btn" onClick={handleBuyNow} style={{ flex: 1 }}>Mua Ngay</button>
                     </div>
                 </div>
             </div>
@@ -255,7 +286,6 @@ const ProductDetail = ({ user, updateCartCount }) => {
                     <span className="comment-count">{comments.length} đánh giá</span>
                 </div>
 
-                {/* Review Form */}
                 <div className="comment-form">
                     <h3>Gửi đánh giá của bạn</h3>
                     <form onSubmit={submitReview}>
@@ -269,11 +299,11 @@ const ProductDetail = ({ user, updateCartCount }) => {
                                 <option value="1">1 Sao (Rất kém)</option>
                             </select>
                         </div>
-                        <textarea 
-                            value={reviewContent} 
-                            onChange={(e) => setReviewContent(e.target.value)} 
-                            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." 
-                            required 
+                        <textarea
+                            value={reviewContent}
+                            onChange={(e) => setReviewContent(e.target.value)}
+                            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                            required
                         />
                         <button type="submit" className="submit-comment">Gửi Đánh Giá</button>
                     </form>

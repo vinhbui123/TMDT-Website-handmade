@@ -15,11 +15,25 @@ const Login = () => {
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
 
+    // ========================================================
+    // CẬP NHẬT: LƯU TOKEN VÀ ĐỒNG BỘ EVENT ĐĂNG NHẬP TOÀN CỤC
+    // ========================================================
     const processLoginResponse = (response, data) => {
         if (response.ok) {
             setSuccess('Đăng nhập thành công!');
+
+            // 1. Lưu thông tin User
             localStorage.setItem('user', JSON.stringify(data.user));
+
+            // 2. Tự động kiểm tra chuỗi Token từ API backend trả về và lưu lại (Thường là data.token hoặc data.accessToken)
+            const token = data.token || data.accessToken || data.access_token;
+            if (token) {
+                localStorage.setItem('token', token);
+            }
+
+            // 3. Kích hoạt đồng bộ tức thì cho file App.js nhận diện ngay (Không cần tải lại trang)
             window.dispatchEvent(new Event('storage'));
+            window.dispatchEvent(new Event('userLoggedIn'));
 
             // Redirect shop owners (role === 2) to shop dashboard
             const redirectPath = data.user.role === 2 ? '/ShopDashBoard' : '/';
@@ -144,7 +158,7 @@ const Login = () => {
                                 Google
                             </button>
                         </div>
-                        
+
                         <FacebookLogin
                             appId={FB_APP_ID}
                             autoLoad={false}

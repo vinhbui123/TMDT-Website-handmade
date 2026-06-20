@@ -1,6 +1,7 @@
 package com.project.web_hand_made_TMDT.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Formula;
@@ -22,6 +23,13 @@ public class Product {
 
     @Column(name = "catalog_id")
     private int catalog_id;
+
+    // ========================================================
+    // ĐỒNG BỘ CHUẨN VỚI CỘT shop_id TRONG DATABASE CỦA BẠN
+    // ========================================================
+    @Column(name = "shop_id")
+    @JsonProperty("shop_id")
+    private Integer shop_id;
 
     @Column(name = "name")
     private String name;
@@ -57,7 +65,7 @@ public class Product {
     @PrimaryKeyJoinColumn
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @com.fasterxml.jackson.annotation.JsonIgnore
+    @JsonIgnore
     private Inventory inventory;
 
     // Custom getter để giữ nguyên logic cũ getQuantity()
