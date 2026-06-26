@@ -150,7 +150,19 @@ function CartPage() {
                                     <td style={{ padding: '15px' }}>
                                         <Link to={`/product-detail?id=${item.productId}`} style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
                                             <img src={item.productImage} alt={item.productName} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '15px' }} />
-                                            <span style={{ fontWeight: '500' }}>{item.productName}</span>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontWeight: '500' }}>{item.productName}</span>
+                                                {item.selectedColor && (
+                                                    <span style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                                        Màu sắc: {item.selectedColor}
+                                                    </span>
+                                                )}
+                                                {item.customText && (
+                                                    <span style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                                                        Tùy chỉnh: {item.customText}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </Link>
                                     </td>
                                     <td style={{ padding: '15px', textAlign: 'center' }}>

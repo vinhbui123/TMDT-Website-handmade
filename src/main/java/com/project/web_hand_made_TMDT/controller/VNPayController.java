@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Config.VNPayConfig;
-import com.project.web_hand_made_TMDT.Service.VNPayService;
+import com.project.web_hand_made_TMDT.service.VNPayService;
+import com.project.web_hand_made_TMDT.config.VNPayConfig;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/vnpay")
 @RequiredArgsConstructor
 // Đảm bảo không có dấu / ở cuối URL origin
-@CrossOrigin(origins = "http://localhost:5000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class VNPayController {
 
     private final VNPayService vnpayService;

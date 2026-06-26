@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Model.Order;
-import com.project.web_hand_made_TMDT.Service.OrderService;
-import com.project.web_hand_made_TMDT.Service.VNPayService;
+import com.project.web_hand_made_TMDT.model.Order;
+import com.project.web_hand_made_TMDT.service.OrderService;
+import com.project.web_hand_made_TMDT.service.VNPayService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

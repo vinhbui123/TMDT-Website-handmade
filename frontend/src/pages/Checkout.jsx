@@ -23,6 +23,25 @@ function Checkout() {
     });
 
     useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const res = await fetch('/api/auth/me', { credentials: 'include' });
+                if (res.ok) {
+                    const user = await res.json();
+                    setOrderData(prev => ({
+                        ...prev,
+                        customerName: prev.customerName ? prev.customerName : `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+                        customerPhone: prev.customerPhone ? prev.customerPhone : (user.phoneNumber || ''),
+                        customerAddress: prev.customerAddress ? prev.customerAddress : (user.address || ''),
+                    }));
+                }
+            } catch (err) {
+                console.error('Không thể tải thông tin người dùng từ db:', err);
+            }
+        };
+
+        fetchUserData();
+
         if (initialTotalAmount > 0) {
             setOrderData(prev => ({ ...prev, totalAmount: initialTotalAmount }));
         }

@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Dto.MaterialDTO;
-import com.project.web_hand_made_TMDT.Repository.MaterialRepository;
+import com.project.web_hand_made_TMDT.dto.MaterialDTO;
+import com.project.web_hand_made_TMDT.repository.MaterialRepository;
 
 @RestController
 @RequestMapping("/api/materials")
