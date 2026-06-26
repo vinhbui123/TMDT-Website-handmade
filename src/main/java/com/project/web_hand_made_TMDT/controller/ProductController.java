@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,12 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Dto.ProductDTO;
-import com.project.web_hand_made_TMDT.Model.Comment;
-import com.project.web_hand_made_TMDT.Model.Product;
-import com.project.web_hand_made_TMDT.Model.User;
-import com.project.web_hand_made_TMDT.Repository.UserRepository;
-import com.project.web_hand_made_TMDT.Service.ProductService;
+import com.project.web_hand_made_TMDT.dto.ProductDTO;
+import com.project.web_hand_made_TMDT.model.Comment;
+import com.project.web_hand_made_TMDT.model.Product;
+import com.project.web_hand_made_TMDT.model.User;
+import com.project.web_hand_made_TMDT.repository.ProductCustomizeFieldRepository;
+import com.project.web_hand_made_TMDT.repository.UserRepository;
+import com.project.web_hand_made_TMDT.service.ProductService;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final UserRepository userRepository;
+    private final ProductCustomizeFieldRepository customizeFieldRepository;
 
     @GetMapping("/products")
     public List<Product> getProducts() {
@@ -112,5 +114,10 @@ public class ProductController {
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    @GetMapping("/products/{id}/customize-fields")
+    public ResponseEntity<?> getProductCustomizeFields(@PathVariable("id") int id) {
+        return ResponseEntity.ok(customizeFieldRepository.findByProductIdOrderBySortOrderAsc(id));
     }
 }

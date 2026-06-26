@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Controller;
+package com.project.web_hand_made_TMDT.controller;
 
 import java.util.Map;
 
@@ -11,16 +11,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.web_hand_made_TMDT.Dto.AuthResponse;
-import com.project.web_hand_made_TMDT.Dto.LoginRequest;
-import com.project.web_hand_made_TMDT.Dto.RegisterRequest;
-import com.project.web_hand_made_TMDT.Dto.SocialLoginRequest;
-import com.project.web_hand_made_TMDT.Model.User;
-import com.project.web_hand_made_TMDT.Service.AuthService;
-import com.project.web_hand_made_TMDT.Service.EmailService;
-import com.project.web_hand_made_TMDT.Service.OtpService;
-import com.project.web_hand_made_TMDT.Service.SessionManager;
-import com.project.web_hand_made_TMDT.Util.HashUtil;
+import com.project.web_hand_made_TMDT.dto.AuthResponse;
+import com.project.web_hand_made_TMDT.dto.LoginRequest;
+import com.project.web_hand_made_TMDT.dto.RegisterRequest;
+import com.project.web_hand_made_TMDT.dto.SocialLoginRequest;
+import com.project.web_hand_made_TMDT.model.User;
+import com.project.web_hand_made_TMDT.service.AuthService;
+import com.project.web_hand_made_TMDT.service.CartService;
+import com.project.web_hand_made_TMDT.service.EmailService;
+import com.project.web_hand_made_TMDT.service.OtpService;
+import com.project.web_hand_made_TMDT.service.SessionManager;
+import com.project.web_hand_made_TMDT.util.HashUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +37,7 @@ public class AuthController {
     private final OtpService otpService;
     private final EmailService emailService;
     private final SessionManager sessionManager;
+    private final CartService cartService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
@@ -44,6 +46,7 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
             sessionManager.addSession(response.getUser().getId(), session);
+            cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
@@ -65,6 +68,7 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
             sessionManager.addSession(response.getUser().getId(), session);
+            cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
@@ -77,6 +81,7 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
             sessionManager.addSession(response.getUser().getId(), session);
+            cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);

@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../assets/css/ProductDetail.css';
-import { 
-    KeychainCustomizer, 
-    GiftComboCustomizer, 
-    WoolFlowerCustomizer, 
-    AccessoryCustomizer 
-} from '../components/CustomizerFields';
 
-const ProductDetail = ({ user, updateCartCount }) => {
+const ProductDetail = ({ user, updateCartCount, openChat }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
@@ -23,6 +17,15 @@ const ProductDetail = ({ user, updateCartCount }) => {
     // Lưu toàn bộ thông tin người dùng tùy chỉnh
     const [customData, setCustomData] = useState({});
 
+    // Dynamic Customize Fields từ DB
+    const [customizeFields, setCustomizeFields] = useState([]);
+
+    // Custom Request Modal State
+    const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+    const [customRequestDesc, setCustomRequestDesc] = useState('');
+    const [customRequestImgUrl, setCustomRequestImgUrl] = useState('');
+    const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
+
     // Review form state
     const [rating, setRating] = useState(5);
     const [reviewContent, setReviewContent] = useState('');
@@ -31,6 +34,15 @@ const ProductDetail = ({ user, updateCartCount }) => {
         fetchProductData();
         fetchComments();
     }, [id]);
+
+    // Fetch dynamic customize fields khi có product
+    useEffect(() => {
+        if (!product) return;
+        fetch(`/api/products/${product.id}/customize-fields`)
+            .then(res => res.ok ? res.json() : [])
+            .then(data => setCustomizeFields(Array.isArray(data) ? data : []))
+            .catch(() => setCustomizeFields([]));
+    }, [product]);
 
     const fetchProductData = async () => {
         try {
@@ -63,10 +75,27 @@ const ProductDetail = ({ user, updateCartCount }) => {
 
     const handleAddToCart = async () => {
         try {
+            // Nối dữ liệu customData thành chuỗi text
+            const customTextArray = Object.entries(customData)
+                .filter(([k, v]) => v && v.toString().trim() !== '')
+                .map(([k, v]) => {
+                    // Tìm label từ customizeFields
+                    const fieldId = k.replace('field_', '');
+                    const field = customizeFields.find(f => String(f.id) === fieldId);
+                    const label = field ? field.fieldLabel : k;
+                    return `${label}: ${v}`;
+                });
+            const customTextString = customTextArray.join(' | ');
+
             const res = await fetch('/api/cart/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId: product.id, quantity })
+                body: JSON.stringify({ 
+                    productId: product.id, 
+                    quantity,
+                    customText: customTextString || null,
+                    selectedColor: selectedColor?.name || null
+                })
             });
             const data = await res.json();
             if (data.success) {
@@ -87,25 +116,113 @@ const ProductDetail = ({ user, updateCartCount }) => {
         navigate('/cart');
     };
 
-    // HÀM XỬ LÝ RẼ NHÁNH GIAO DIỆN THEO CHẤT LIỆU
-    const renderCustomizerByCategory = () => {
-        // Kiểm tra xem sản phẩm có category không
-        if (!product?.catalog_id) return null;
-
-        const currentMaterials = product.materials || [];
-
-        switch (product.catalog_id) {
-            case 1:     // ID của Móc khóa
-                return <KeychainCustomizer customData={customData} setCustomData={setCustomData} materials={currentMaterials} />;
-            case 2:     // ID của Combo quà tặng
-                return <GiftComboCustomizer customData={customData} setCustomData={setCustomData} />;
-            case 3:     // ID của Hoa len
-                return <WoolFlowerCustomizer customData={customData} setCustomData={setCustomData} materials={currentMaterials} />;
-            case 4:     // ID của Phụ kiện
-                return <AccessoryCustomizer product={product} customData={customData} setCustomData={setCustomData} />;
-            default:
-                return null; // Các loại sản phẩm khác không cần customize
+    const submitCustomRequest = async (e) => {
+        e.preventDefault();
+        setIsSubmittingCustom(true);
+        try {
+            const res = await fetch('/api/custom-requests/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: product.id,
+                    customText: product.name,
+                    description: customRequestDesc,
+                    referenceImg: customRequestImgUrl
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alert(data.message);
+                setIsCustomModalOpen(false);
+                setCustomRequestDesc('');
+                setCustomRequestImgUrl('');
+            } else {
+                alert(data.message || 'Lỗi gửi yêu cầu');
+            }
+        } catch (err) {
+            alert('Lỗi hệ thống khi gửi yêu cầu');
+        } finally {
+            setIsSubmittingCustom(false);
         }
+    };
+
+    const getCustomSurcharge = () => {
+        let surcharge = 0;
+        customizeFields.forEach(field => {
+            if (field.fieldType === 'select') {
+                const selectedValue = customData[`field_${field.id}`];
+                if (selectedValue) {
+                    const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
+                    const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+                    const idx = names.indexOf(selectedValue);
+                    if (idx !== -1 && prices[idx]) {
+                        surcharge += Number(prices[idx]) || 0;
+                    }
+                }
+            }
+        });
+        return surcharge;
+    };
+
+    // RENDER DYNAMIC CUSTOMIZE FIELDS TỪ DB
+    const renderDynamicCustomizeFields = () => {
+        if (!customizeFields || customizeFields.length === 0) return null;
+
+        return (
+            <div className="customizer-box" style={{ margin: '15px 0', padding: '15px', backgroundColor: '#f9f9f9', border: '1px dashed #c97a3e', borderRadius: '8px' }}>
+                {customizeFields.map((field, idx) => (
+                    <div key={idx} style={{ marginBottom: idx < customizeFields.length - 1 ? '12px' : 0 }}>
+                        <label style={{ fontWeight: 600, fontSize: '14px', display: 'block', marginBottom: '5px' }}>
+                            {field.fieldLabel}{field.required && <span style={{color:'red'}}> *</span>}
+                        </label>
+
+                        {field.fieldType === 'text' && (
+                            <input
+                                type="text"
+                                placeholder={field.placeholder || ''}
+                                maxLength={field.maxLength || undefined}
+                                value={customData[`field_${field.id}`] || ''}
+                                onChange={(e) => setCustomData({ ...customData, [`field_${field.id}`]: e.target.value })}
+                                style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}
+                            />
+                        )}
+
+                        {field.fieldType === 'textarea' && (
+                            <textarea
+                                placeholder={field.placeholder || ''}
+                                rows="2"
+                                value={customData[`field_${field.id}`] || ''}
+                                onChange={(e) => setCustomData({ ...customData, [`field_${field.id}`]: e.target.value })}
+                                style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd', resize: 'vertical' }}
+                            />
+                        )}
+
+                        {field.fieldType === 'select' && (() => {
+                            const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
+                            const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+                            return (
+                                <select
+                                    value={customData[`field_${field.id}`] || ''}
+                                    onChange={(e) => setCustomData({ ...customData, [`field_${field.id}`]: e.target.value })}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ddd' }}
+                                >
+                                    <option value="">-- Chọn --</option>
+                                    {names.filter(o => o).map((opt, i) => {
+                                        const price = Number(prices[i] || 0);
+                                        const priceText = price > 0 ? ` (+${price.toLocaleString()}đ)` : '';
+                                        return (
+                                            <option key={i} value={opt}>
+                                                {opt}{priceText}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            );
+                        })()}
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     const submitReview = async (e) => {
@@ -135,7 +252,9 @@ const ProductDetail = ({ user, updateCartCount }) => {
     if (error) return <div style={{textAlign: 'center', padding: '50px', color: 'red'}}>Lỗi: {error}</div>;
     if (!product) return null;
 
-    const discountPrice = product.discount > 0 ? product.price * (1 - product.discount/100) : product.price;
+    const surcharge = getCustomSurcharge();
+    const baseDiscountPrice = product.discount > 0 ? product.price * (1 - product.discount/100) : product.price;
+    const finalPrice = baseDiscountPrice + surcharge;
 
     const averageRating = comments.length > 0 
         ? (comments.reduce((sum, c) => sum + c.rating, 0) / comments.length).toFixed(1)
@@ -183,11 +302,11 @@ const ProductDetail = ({ user, updateCartCount }) => {
                     <p className="price">
                         {product.discount > 0 ? (
                             <>
-                                {discountPrice.toLocaleString()}đ
-                                <span className="old-price" style={{marginLeft: 10}}>{product.price.toLocaleString()}đ</span>
+                                {finalPrice.toLocaleString()}đ
+                                <span className="old-price" style={{marginLeft: 10}}>{(product.price + surcharge).toLocaleString()}đ</span>
                             </>
                         ) : (
-                            `${product.price.toLocaleString()}đ`
+                            `${finalPrice.toLocaleString()}đ`
                         )}
                     </p>
 
@@ -218,15 +337,76 @@ const ProductDetail = ({ user, updateCartCount }) => {
                         Kho: {product.quantity}
                     </div>
 
-                    {/* HIỂN THỊ KHU VỰC CUSTOMIZE TÙY LOẠI */}
-                    {renderCustomizerByCategory()}
+                    {/* HIỂN THỊ KHU VỰC CUSTOMIZE DYNAMIC */}
+                    {renderDynamicCustomizeFields()}
 
-                    <div className="btn-box">
-                        <button className="cart-btn" onClick={handleAddToCart}>
+                    <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        {/* CHỮA LỖI: Gọi hàm openChat truyền ngược data sản phẩm lên App.jsx */}
+                        <button
+                            className="chat-now-btn"
+                            onClick={() => openChat && openChat(product)}
+                            style={{
+                                backgroundColor: 'rgba(238, 77, 45, 0.1)',
+                                color: '#ee4d2d',
+                                border: '1px solid #ee4d2d',
+                                padding: '0 15px',
+                                height: '48px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                minWidth: '95px',
+                                fontSize: '14px',
+                                gap: '2px'
+                            }}
+                        >
+                            <i className="far fa-comment-dots" style={{ fontSize: '18px' }}></i>
+                            <span>Chat ngay</span>
+                        </button>
+
+                        <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1 }}>
                             <i className="fa-solid fa-cart-plus" style={{marginRight: 5}}></i>Thêm Vào Giỏ Hàng
                         </button>
-                        <button className="buy-btn" onClick={handleBuyNow}>Mua Ngay</button>
+                        <button className="buy-btn" onClick={handleBuyNow} style={{ flex: 1 }}>Mua Ngay</button>
                     </div>
+
+                    {/* Chỉ hiện nút Yêu cầu Thiết kế Riêng nếu sản phẩm có chất liệu đặc biệt */}
+                    {(() => {
+                        // Map chất liệu đặc biệt hỗ trợ gia công (khắc, sơn, in)
+                        const specialMaterialMap = {
+                            'gỗ': 'khắc gỗ',
+                            'thủy tinh': 'khắc thủy tinh',
+                            'kim nhung': 'sơn kim nhung'
+                        };
+                        const productMaterials = product.materials || [];
+                        const matchedSpecials = productMaterials
+                            .filter(m => specialMaterialMap[m.name.trim().toLowerCase()])
+                            .map(m => specialMaterialMap[m.name.trim().toLowerCase()]);
+
+                        if (matchedSpecials.length === 0) return null;
+
+                        return (
+                            <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '10px' }}>
+                                    Sản phẩm này hỗ trợ thiết kế đặc biệt: <strong>{matchedSpecials.join(', ')}</strong> (có tính phí).
+                                </p>
+                                <button 
+                                    style={{
+                                        width: '100%', padding: '12px', borderRadius: '8px', 
+                                        background: '#fff', border: '1px solid #8B5E34', color: '#8B5E34', 
+                                        fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s'
+                                    }}
+                                    onMouseOver={(e) => { e.target.style.background = '#8B5E34'; e.target.style.color = '#fff'; }}
+                                    onMouseOut={(e) => { e.target.style.background = '#fff'; e.target.style.color = '#8B5E34'; }}
+                                    onClick={() => setIsCustomModalOpen(true)}
+                                >
+                                    Yêu Cầu Thiết Kế Riêng (Cần báo giá)
+                                </button>
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
 
@@ -300,6 +480,49 @@ const ProductDetail = ({ user, updateCartCount }) => {
                     )}
                 </div>
             </div>
+
+            {/* Custom Request Modal */}
+            {isCustomModalOpen && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+                    <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '100%', maxWidth: '500px' }}>
+                        <h3 style={{ marginTop: 0, color: '#8B5E34' }}>Gửi Yêu Cầu Thiết Kế Riêng</h3>
+                        <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '20px' }}>
+                            Yêu cầu của bạn sẽ được gửi trực tiếp đến Shop. Shop sẽ xem xét vật liệu, công sức và gửi lại Báo giá chính xác nhất cho bạn.
+                        </p>
+                        <form onSubmit={submitCustomRequest}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Mô tả chi tiết yêu cầu:</label>
+                                <textarea 
+                                    required
+                                    value={customRequestDesc}
+                                    onChange={(e) => setCustomRequestDesc(e.target.value)}
+                                    placeholder="VD: Tôi muốn khắc thêm logo công ty bằng laser lên mặt gỗ..."
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', minHeight: '100px', resize: 'vertical' }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Đường dẫn ảnh minh họa (URL) - Nếu có:</label>
+                                <input 
+                                    type="text"
+                                    value={customRequestImgUrl}
+                                    onChange={(e) => setCustomRequestImgUrl(e.target.value)}
+                                    placeholder="https://..."
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
+                                />
+                                {customRequestImgUrl && (
+                                    <img src={customRequestImgUrl} alt="Preview" style={{ marginTop: '10px', maxHeight: '100px', borderRadius: '8px' }} />
+                                )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={() => setIsCustomModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#eee', cursor: 'pointer' }}>Hủy</button>
+                                <button type="submit" disabled={isSubmittingCustom} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#D4A373', color: '#fff', fontWeight: 'bold', cursor: isSubmittingCustom ? 'not-allowed' : 'pointer' }}>
+                                    {isSubmittingCustom ? 'Đang gửi...' : 'Gửi Yêu Cầu'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

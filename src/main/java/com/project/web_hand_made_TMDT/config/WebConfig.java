@@ -1,4 +1,4 @@
-package com.project.web_hand_made_TMDT.Config;
+package com.project.web_hand_made_TMDT.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
