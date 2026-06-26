@@ -118,6 +118,15 @@ public class ShopProductController {
             if (details.getImg() != null) {
                 product.setImg(details.getImg());
             }
+            if (details.getColors() != null) {
+                product.setColors(details.getColors());
+            }
+            if (details.getMaterials() != null) {
+                product.setMaterials(details.getMaterials());
+            }
+            if (details.getSubImg() != null) {
+                product.setSubImg(details.getSubImg());
+            }
             Product saved = productRepository.save(product);
             return ResponseEntity.ok((Object) Map.of("success", true, "data", saved));
         }).orElse(ResponseEntity.notFound().build());
