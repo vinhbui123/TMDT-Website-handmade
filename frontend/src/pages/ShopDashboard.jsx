@@ -204,8 +204,8 @@ export default function ShopDashboard() {
     const handleUpdateOption = (fieldIdx, optIdx, newName, newPrice) => {
         const arr = [...customizeFields];
         const field = arr[fieldIdx];
-        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
-        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+        const names = field.options ? field.options.split(',') : [];
+        const prices = field.optionPrices ? field.optionPrices.split(',') : [];
         
         while (prices.length < names.length) {
             prices.push('0');
@@ -222,10 +222,10 @@ export default function ShopDashboard() {
     const handleAddOption = (fieldIdx) => {
         const arr = [...customizeFields];
         const field = arr[fieldIdx];
-        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
-        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+        const names = field.options ? field.options.split(',') : [];
+        const prices = field.optionPrices ? field.optionPrices.split(',') : [];
         
-        names.push('Lựa chọn mới');
+        names.push('');
         prices.push('0');
         
         field.options = names.join(',');
@@ -236,8 +236,8 @@ export default function ShopDashboard() {
     const handleDeleteOption = (fieldIdx, optIdx) => {
         const arr = [...customizeFields];
         const field = arr[fieldIdx];
-        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
-        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+        const names = field.options ? field.options.split(',') : [];
+        const prices = field.optionPrices ? field.optionPrices.split(',') : [];
         
         names.splice(optIdx, 1);
         if (prices.length > optIdx) {
@@ -691,8 +691,8 @@ export default function ShopDashboard() {
                                         )}
                                     </div>
                                     {field.fieldType === 'select' && (() => {
-                                        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
-                                        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+                                        const names = field.options ? field.options.split(',') : [];
+                                        const prices = field.optionPrices ? field.optionPrices.split(',') : [];
                                         return (
                                             <div className="shop-form-group" style={{ marginTop: '12px', marginBottom: 0, padding: '12px', background: '#f3f4f6', borderRadius: '8px' }}>
                                                 <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px', display: 'block' }}>Các lựa chọn & Giá cộng thêm (VNĐ):</label>
