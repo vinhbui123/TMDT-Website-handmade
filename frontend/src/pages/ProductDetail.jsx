@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../assets/css/ProductDetail.css';
 
-const ProductDetail = ({ user, updateCartCount }) => {
+const ProductDetail = ({ user, updateCartCount, openChat }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
@@ -340,11 +340,36 @@ const ProductDetail = ({ user, updateCartCount }) => {
                     {/* HIỂN THỊ KHU VỰC CUSTOMIZE DYNAMIC */}
                     {renderDynamicCustomizeFields()}
 
-                    <div className="btn-box">
-                        <button className="cart-btn" onClick={handleAddToCart}>
+                    <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        {/* CHỮA LỖI: Gọi hàm openChat truyền ngược data sản phẩm lên App.jsx */}
+                        <button
+                            className="chat-now-btn"
+                            onClick={() => openChat && openChat(product)}
+                            style={{
+                                backgroundColor: 'rgba(238, 77, 45, 0.1)',
+                                color: '#ee4d2d',
+                                border: '1px solid #ee4d2d',
+                                padding: '0 15px',
+                                height: '48px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                minWidth: '95px',
+                                fontSize: '14px',
+                                gap: '2px'
+                            }}
+                        >
+                            <i className="far fa-comment-dots" style={{ fontSize: '18px' }}></i>
+                            <span>Chat ngay</span>
+                        </button>
+
+                        <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1 }}>
                             <i className="fa-solid fa-cart-plus" style={{marginRight: 5}}></i>Thêm Vào Giỏ Hàng
                         </button>
-                        <button className="buy-btn" onClick={handleBuyNow}>Mua Ngay</button>
+                        <button className="buy-btn" onClick={handleBuyNow} style={{ flex: 1 }}>Mua Ngay</button>
                     </div>
 
                     {/* Chỉ hiện nút Yêu cầu Thiết kế Riêng nếu sản phẩm có chất liệu đặc biệt */}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Banner from './components/Banner'
@@ -23,6 +23,7 @@ import UpdateProfile from './components/UpdateProfile'
 
 import './assets/css/App.css'
 import ProductCategoryList from './pages/ProductCategoryList'
+import ChatWidget from "./components/ChatWidget.jsx";
 
 function App() {
   const [user, setUser] = useState(null)
@@ -32,10 +33,28 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // 1. Lấy thông tin User (Logic của Vinh)
+  // CHỮA LỖI: Thêm quản lý trạng thái đóng/mở ChatWidget và sản phẩm tư vấn toàn cục
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [activeProduct, setActiveProduct] = useState(null)
+
+  // Hàm giúp trang chi tiết sản phẩm kích hoạt mở Chat kèm data sản phẩm
+  const openChatWithProduct = (productData) => {
+    setActiveProduct(productData)
+    setIsChatOpen(true)
+  }
+
+  // 1. Lấy thông tin User (Đính kèm token chống lỗi 401)
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' })
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/auth/me', {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'
+      })
       if (res.ok) {
         const data = await res.json()
         setUser(data)
@@ -48,10 +67,14 @@ function App() {
     }
   }
 
-  // 2. Lấy số lượng giỏ hàng (Logic của bạn)
+  // 2. Lấy số lượng giỏ hàng
   const updateCartCount = async () => {
     try {
-      const res = await fetch('/api/cart')
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/cart', { headers })
       if (res.ok) {
         const data = await res.json()
         setCartCount(data.cartCount || 0)
@@ -61,7 +84,7 @@ function App() {
     }
   }
 
-  // 3. Lấy danh sách sản phẩm (Kết hợp cả hai)
+  // 3. Lấy danh sách sản phẩm
   const fetchProducts = async () => {
     setLoading(true)
     setError(null)
@@ -71,7 +94,6 @@ function App() {
       const data = await res.json()
 
       if (Array.isArray(data)) {
-        // Áp dụng tính displayPrice từ bản của bạn
         const processed = data.map(p => ({
           ...p,
           displayPrice: p.discount > 0 ? p.price * (1 - p.discount/100) : p.price
@@ -92,21 +114,29 @@ function App() {
     fetchProducts()
     updateCartCount()
 
-    // Đồng bộ khi có thay đổi từ tab khác hoặc sự kiện giỏ hàng
-    window.addEventListener('storage', fetchUser)
-    window.addEventListener('storage', updateCartCount)
+    const handleSyncData = () => {
+      fetchUser()
+      updateCartCount()
+    }
+
+    window.addEventListener('storage', handleSyncData)
+    window.addEventListener('userLoggedIn', handleSyncData)
     window.addEventListener('cartUpdated', updateCartCount)
 
     return () => {
-      window.removeEventListener('storage', fetchUser)
-      window.removeEventListener('storage', updateCartCount)
+      window.removeEventListener('storage', handleSyncData)
+      window.removeEventListener('userLoggedIn', handleSyncData)
       window.removeEventListener('cartUpdated', updateCartCount)
     }
   }, [])
 
-  // 4. Hàm thêm vào giỏ hàng (Ưu tiên bản đầy đủ của bạn)
+  // 4. Hàm thêm vào giỏ hàng
   const handleAddToCart = async (productId, quantity = 1) => {
     try {
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -159,26 +189,43 @@ function App() {
                 </div>
               } />
 
-              {/* CÁC ROUTE AUTH (Của Vinh) */}
+              {/* CÁC ROUTE AUTH */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/change-password" element={<ChangePassword />} />
               <Route path="/profile" element={<UpdateProfile />} />
 
-              {/* CÁC ROUTE CHỨC NĂNG (Của bạn) */}
+              {/* CÁC ROUTE CHỨC NĂNG */}
               <Route path="/cart" element={<CartPage onCartChange={updateCartCount} />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/vnpay-return" element={<VNPayReturn />} />
               <Route path="/order-history" element={<OrderHistory />} />
-              <Route path="/product/:id" element={<ProductDetail user={user} updateCartCount={updateCartCount} />} />
+
+              {/* CHỮA LỖI: Truyền hàm điều khiển chat vào ProductDetail */}
+              <Route path="/product/:id" element={
+                <ProductDetail
+                    user={user}
+                    updateCartCount={updateCartCount}
+                    openChat={openChatWithProduct}
+                />
+              } />
+
               <Route path="/products" element={<ProductCategoryList />} />
-                <Route path="/ShopDashBoard" element={<ShopDashboard />} />
+              <Route path="/ShopDashBoard" element={<ShopDashboard />} />
             </Routes>
           </main>
 
           <Footer />
           <Chatbot />
+
+          {/* CHỮA LỖI: Truyền đúng state đồng bộ của App vào đây */}
+          <ChatWidget
+              product={activeProduct}
+              user={user}
+              isOpen={isChatOpen}
+              setIsOpen={setIsChatOpen}
+          />
         </div>
       </Router>
   )

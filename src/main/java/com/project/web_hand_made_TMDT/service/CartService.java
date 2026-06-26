@@ -1,17 +1,12 @@
 package com.project.web_hand_made_TMDT.service;
 
+import com.project.web_hand_made_TMDT.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.web_hand_made_TMDT.model.Cart;
-import com.project.web_hand_made_TMDT.model.CartItem;
-import com.project.web_hand_made_TMDT.model.DbCartItem;
-import com.project.web_hand_made_TMDT.model.Product;
-import com.project.web_hand_made_TMDT.model.ProductCustomizeField;
-import com.project.web_hand_made_TMDT.model.User;
 import com.project.web_hand_made_TMDT.repository.DbCartItemRepository;
 import com.project.web_hand_made_TMDT.repository.ProductCustomizeFieldRepository;
 import com.project.web_hand_made_TMDT.repository.ProductRepository;

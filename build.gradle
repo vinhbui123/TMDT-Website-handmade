@@ -45,4 +45,7 @@ dependencies {
 
 	// Spring Mail for sending OTP emails
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	
+	// Spring WebSocket for Chat
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }

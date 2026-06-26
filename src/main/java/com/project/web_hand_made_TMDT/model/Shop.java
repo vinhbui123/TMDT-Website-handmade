@@ -1,6 +1,7 @@
 package com.project.web_hand_made_TMDT.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
@@ -24,6 +25,12 @@ public class Shop {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User user;
+
+    @Transient
+    @JsonProperty("userId")
+    public Integer getOwnerId() {
+        return user != null ? user.getId() : null;
+    }
 
     @Column(name = "shop_name")
     private String shopName;
