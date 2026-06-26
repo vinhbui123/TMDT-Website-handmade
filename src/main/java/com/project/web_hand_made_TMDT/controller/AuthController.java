@@ -17,6 +17,7 @@ import com.project.web_hand_made_TMDT.dto.RegisterRequest;
 import com.project.web_hand_made_TMDT.dto.SocialLoginRequest;
 import com.project.web_hand_made_TMDT.model.User;
 import com.project.web_hand_made_TMDT.service.AuthService;
+import com.project.web_hand_made_TMDT.service.CartService;
 import com.project.web_hand_made_TMDT.service.EmailService;
 import com.project.web_hand_made_TMDT.service.OtpService;
 import com.project.web_hand_made_TMDT.service.SessionManager;
@@ -36,6 +37,7 @@ public class AuthController {
     private final OtpService otpService;
     private final EmailService emailService;
     private final SessionManager sessionManager;
+    private final CartService cartService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
@@ -44,6 +46,7 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
             sessionManager.addSession(response.getUser().getId(), session);
+            cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
@@ -65,6 +68,7 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
             sessionManager.addSession(response.getUser().getId(), session);
+            cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
@@ -77,6 +81,7 @@ public class AuthController {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
             sessionManager.addSession(response.getUser().getId(), session);
+            cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);

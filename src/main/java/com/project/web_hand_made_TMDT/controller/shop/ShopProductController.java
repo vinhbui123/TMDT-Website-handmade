@@ -1,7 +1,9 @@
 package com.project.web_hand_made_TMDT.controller.shop;
 
 import com.project.web_hand_made_TMDT.model.Product;
+import com.project.web_hand_made_TMDT.model.ProductCustomizeField;
 import com.project.web_hand_made_TMDT.model.Shop;
+import com.project.web_hand_made_TMDT.repository.ProductCustomizeFieldRepository;
 import com.project.web_hand_made_TMDT.repository.ProductRepository;
 import com.project.web_hand_made_TMDT.repository.ShopRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,7 @@ public class ShopProductController {
 
     private final ProductRepository productRepository;
     private final ShopRepository shopRepository;
+    private final ProductCustomizeFieldRepository customizeFieldRepository;
 
     @Value("${file.upload-dir:src/main/resources/static/images/}")
     private String uploadDir;
@@ -56,7 +59,7 @@ public class ShopProductController {
      * Lấy danh sách sản phẩm theo catalog_id.
      */
     @GetMapping("/catalog/{catalogId}")
-    public ResponseEntity<?> getProductsByCatalog(@PathVariable int catalogId) {
+    public ResponseEntity<?> getProductsByCatalog(@PathVariable("catalogId") int catalogId) {
         List<Product> products = productRepository.findByCatalogId(catalogId);
         return ResponseEntity.ok(products);
     }
@@ -90,7 +93,7 @@ public class ShopProductController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(
-            @PathVariable int id,
+            @PathVariable("id") int id,
             @RequestBody Product details,
             HttpServletRequest request) {
 
@@ -136,7 +139,7 @@ public class ShopProductController {
      * Xóa sản phẩm theo ID.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<?> deleteProduct(@PathVariable("id") int id, HttpServletRequest request) {
         Integer userId = getLoggedInUserId(request);
         if (userId == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập"));
@@ -197,5 +200,58 @@ public class ShopProductController {
         HttpSession session = request.getSession(false);
         if (session == null) return null;
         return (Integer) session.getAttribute("userId");
+    }
+
+    // ===================== CUSTOMIZE FIELDS =====================
+
+    /**
+     * Lấy danh sách customize fields của sản phẩm (Shop dùng).
+     */
+    @GetMapping("/{id}/customize-fields")
+    public ResponseEntity<?> getCustomizeFields(@PathVariable("id") int id) {
+        return ResponseEntity.ok(customizeFieldRepository.findByProductIdOrderBySortOrderAsc(id));
+    }
+
+    /**
+     * Shop lưu toàn bộ customize fields cho sản phẩm (xóa cũ + thêm mới).
+     */
+    @PostMapping("/{id}/customize-fields")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<?> saveCustomizeFields(
+            @PathVariable("id") int id,
+            @RequestBody List<ProductCustomizeField> fields,
+            HttpServletRequest request) {
+
+        Integer userId = getLoggedInUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập"));
+        }
+
+        // Xóa hết field cũ
+        customizeFieldRepository.deleteByProductId(id);
+
+        // Lưu field mới
+        for (int i = 0; i < fields.size(); i++) {
+            ProductCustomizeField f = fields.get(i);
+            f.setId(null); // reset ID để auto-generate
+            f.setProductId(id);
+            f.setSortOrder(i);
+            customizeFieldRepository.save(f);
+        }
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Đã lưu cấu hình tùy chỉnh"));
+    }
+
+    /**
+     * Xóa một customize field.
+     */
+    @DeleteMapping("/customize-fields/{fieldId}")
+    public ResponseEntity<?> deleteCustomizeField(@PathVariable("fieldId") int fieldId, HttpServletRequest request) {
+        Integer userId = getLoggedInUserId(request);
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập"));
+        }
+        customizeFieldRepository.deleteById(fieldId);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Đã xóa"));
     }
 }

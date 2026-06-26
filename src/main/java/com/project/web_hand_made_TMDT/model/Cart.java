@@ -18,7 +18,7 @@ public class Cart implements Serializable {
     public void addItem(CartItem item) {
         if (items == null) items = new ArrayList<>();
         items.stream()
-                .filter(i -> i.getProductId() == item.getProductId())
+                .filter(i -> i.equals(item))
                 .findFirst()
                 .ifPresentOrElse(
                         exist -> exist.setQuantity(exist.getQuantity() + item.getQuantity()), // Cộng dồn số lượng

@@ -29,6 +29,12 @@ public class OrderDetail {
     // Khi có dòng này, JSON trả về sẽ có thêm object "product": { "name": "...", "img": "..." }
     // ----------------------------------------------------------
 
+    @Column(name = "custom_text", columnDefinition = "TEXT")
+    private String customText;
+
+    @Column(name = "selected_color")
+    private String selectedColor;
+
     private int price;
     private int quantity;
 

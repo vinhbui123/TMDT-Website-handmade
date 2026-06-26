@@ -32,8 +32,10 @@ public class CartController {
         try {
             int productId = Integer.parseInt(request.get("productId").toString());
             int quantity = Integer.parseInt(request.getOrDefault("quantity", 1).toString());
+            String customText = request.containsKey("customText") ? request.get("customText").toString() : null;
+            String selectedColor = request.containsKey("selectedColor") ? request.get("selectedColor").toString() : null;
 
-            Cart cart = cartService.addProductToCart(productId, quantity);
+            Cart cart = cartService.addProductToCart(productId, quantity, customText, selectedColor);
 
             return ResponseEntity.ok(Map.of(
                     "success", true,

@@ -27,6 +27,13 @@ export default function ShopDashboard() {
     const [quotingReq, setQuotingReq] = useState(null);
     const [quotePricing, setQuotePricing] = useState({ pricePerLetter: 10000, basePrice: 50000 });
 
+    // STATES Customize Fields
+    const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
+    const [customizeProductId, setCustomizeProductId] = useState(null);
+    const [customizeProductName, setCustomizeProductName] = useState('');
+    const [customizeFields, setCustomizeFields] = useState([]);
+    const [savingCustomize, setSavingCustomize] = useState(false);
+
     // Lấy user đang đăng nhập từ localStorage
     const getUser = () => {
         try {
@@ -194,6 +201,54 @@ export default function ShopDashboard() {
         } catch (err) { console.error(err); }
     };
 
+    const handleUpdateOption = (fieldIdx, optIdx, newName, newPrice) => {
+        const arr = [...customizeFields];
+        const field = arr[fieldIdx];
+        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
+        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+        
+        while (prices.length < names.length) {
+            prices.push('0');
+        }
+        
+        names[optIdx] = newName;
+        prices[optIdx] = newPrice ? String(newPrice) : '0';
+        
+        field.options = names.join(',');
+        field.optionPrices = prices.join(',');
+        setCustomizeFields(arr);
+    };
+
+    const handleAddOption = (fieldIdx) => {
+        const arr = [...customizeFields];
+        const field = arr[fieldIdx];
+        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
+        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+        
+        names.push('Lựa chọn mới');
+        prices.push('0');
+        
+        field.options = names.join(',');
+        field.optionPrices = prices.join(',');
+        setCustomizeFields(arr);
+    };
+
+    const handleDeleteOption = (fieldIdx, optIdx) => {
+        const arr = [...customizeFields];
+        const field = arr[fieldIdx];
+        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
+        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+        
+        names.splice(optIdx, 1);
+        if (prices.length > optIdx) {
+            prices.splice(optIdx, 1);
+        }
+        
+        field.options = names.join(',');
+        field.optionPrices = prices.join(',');
+        setCustomizeFields(arr);
+    };
+
     const getStatusLabel = (status) => {
         switch (status) {
             case 0: return 'Chờ duyệt';
@@ -242,7 +297,7 @@ export default function ShopDashboard() {
                                 onClick={() => setActiveTab(tab)}
                                 className={`shop-tab-btn ${activeTab === tab ? 'active' : ''}`}
                             >
-                                {tab === 'products' ? '🎨 Sản phẩm' : tab === 'orders' ? '📦 Đơn hàng' : tab === 'custom_requests' ? '✨ Yêu cầu Custom' : '👤 Hồ sơ'}
+                                {tab === 'products' ? 'Sản phẩm' : tab === 'orders' ? 'Đơn hàng' : tab === 'custom_requests' ? 'Yêu cầu Custom' : 'Hồ sơ'}
                             </button>
                         ))}
                     </nav>
@@ -297,8 +352,7 @@ export default function ShopDashboard() {
                                                         {p.discount > 0 && <span className="product-discount-badge">-{p.discount}%</span>}
                                                     </td>
                                                     <td>
-                                                        <button
-                                                            className="btn-edit"
+                                                        <button className="btn-edit"
                                                             onClick={() => {
                                                                 setEditingProduct(p);
                                                                 setFormData({
@@ -312,6 +366,16 @@ export default function ShopDashboard() {
                                                         >
                                                             Sửa
                                                         </button>
+                                                        <button className="btn-primary" style={{marginLeft:'5px', fontSize:'12px', padding:'5px 10px'}} onClick={async () => {
+                                                            setCustomizeProductId(p.id);
+                                                            setCustomizeProductName(p.name);
+                                                            try {
+                                                                const res = await fetch(`/api/shop/products/${p.id}/customize-fields`, { credentials: 'include' });
+                                                                const data = await res.json();
+                                                                setCustomizeFields(Array.isArray(data) ? data : []);
+                                                            } catch { setCustomizeFields([]); }
+                                                            setIsCustomizeModalOpen(true);
+                                                        }}>Customize</button>
                                                         <button className="btn-danger" onClick={() => handleDeleteProduct(p.id)}>Xóa</button>
                                                     </td>
                                                 </tr>
@@ -339,6 +403,20 @@ export default function ShopDashboard() {
                                             <div className="order-info">
                                                 <h3>Đơn hàng #{o.id}</h3>
                                                 <p>Khách hàng: {o.customerName || ('KH #' + o.userId)} • Đặt lúc: {o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                                                {o.orderDetails && o.orderDetails.length > 0 && (
+                                                    <div style={{ marginTop: '10px', background: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
+                                                        <h4 style={{ fontSize: '13px', marginBottom: '5px' }}>Sản phẩm:</h4>
+                                                        <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '13px' }}>
+                                                            {o.orderDetails.map((item, idx) => (
+                                                                <li key={idx} style={{ marginBottom: '5px' }}>
+                                                                    <strong>{item.product?.name || `Product #${item.productId}`}</strong> x{item.quantity}
+                                                                    {item.selectedColor && <span> - Màu: {item.selectedColor}</span>}
+                                                                    {item.customText && <div style={{ color: '#8B5E34', fontStyle: 'italic' }}>Tùy chỉnh: {item.customText}</div>}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="order-actions">
                                                 <span className={`status-badge ${getStatusClass(o.status)}`}>{getStatusLabel(o.status)}</span>
@@ -543,6 +621,140 @@ export default function ShopDashboard() {
                                 <button type="button" className="btn-modal-cancel" onClick={() => setIsQuoteModalOpen(false)}>Hủy</button>
                                 <button type="button" className="btn-primary" onClick={handleSendQuote}>Gửi Báo Giá Này</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ===== MODAL QUẢN LÝ CUSTOMIZE FIELDS ===== */}
+            {isCustomizeModalOpen && (
+                <div className="shop-modal-overlay">
+                    <div className="shop-modal" style={{ maxWidth: '650px', padding: 0, overflow: 'hidden' }}>
+                        <div className="shop-modal-header" style={{ padding: '20px 24px', background: '#fdfbf7', borderBottom: '1px solid #eae1d5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, color: '#5a4031', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <i className="fa-solid fa-sliders"></i> Tùy chỉnh: {customizeProductName}
+                            </h3>
+                            <button className="shop-modal-close" onClick={() => setIsCustomizeModalOpen(false)}>×</button>
+                        </div>
+                        
+                        <div className="shop-modal-body" style={{ padding: '24px', maxHeight: '65vh', overflowY: 'auto', background: '#fafaf9' }}>
+                            <p style={{ fontSize: '13px', color: '#666', marginBottom: '20px', lineHeight: '1.5' }}>
+                                Thiết lập các thông tin khách hàng cần cung cấp khi mua sản phẩm này.
+                            </p>
+
+                            {customizeFields.map((field, idx) => (
+                                <div key={idx} style={{ background: '#fff', padding: '16px', borderRadius: '12px', marginBottom: '16px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', position: 'relative' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px dashed #e5e7eb' }}>
+                                        <strong style={{ fontSize: '14px', color: '#4b5563' }}><i className="fa-solid fa-list-ul" style={{marginRight:'8px', color:'#9ca3af'}}></i>Trường #{idx + 1}</strong>
+                                        <button className="btn-danger" style={{ fontSize: '12px', padding: '4px 10px', borderRadius: '6px' }} onClick={() => {
+                                            setCustomizeFields(prev => prev.filter((_, i) => i !== idx));
+                                        }}>
+                                            <i className="fa-solid fa-trash-can"></i> Xóa
+                                        </button>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                        <div className="shop-form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px', display: 'block' }}>Tên trường hiển thị:</label>
+                                            <input type="text" value={field.fieldLabel || ''} placeholder="VD: Ghi chú cho Shop"
+                                                onChange={e => { const arr = [...customizeFields]; arr[idx] = { ...arr[idx], fieldLabel: e.target.value }; setCustomizeFields(arr); }}
+                                                style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', transition: 'border-color 0.2s' }} 
+                                                onFocus={e => e.target.style.borderColor = '#D4A373'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                                        </div>
+                                        <div className="shop-form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px', display: 'block' }}>Loại nhập liệu:</label>
+                                            <select value={field.fieldType || 'text'}
+                                                onChange={e => { const arr = [...customizeFields]; arr[idx] = { ...arr[idx], fieldType: e.target.value }; setCustomizeFields(arr); }}
+                                                style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', backgroundColor: '#fff', transition: 'border-color 0.2s' }}
+                                                onFocus={e => e.target.style.borderColor = '#D4A373'} onBlur={e => e.target.style.borderColor = '#d1d5db'}>
+                                                <option value="text">Ô nhập ngắn (Text)</option>
+                                                <option value="textarea">Ô nhập dài (Textarea)</option>
+                                                <option value="select">Danh sách chọn (Select)</option>
+                                            </select>
+                                        </div>
+                                        {field.fieldType !== 'select' && (
+                                            <div className="shop-form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px', display: 'block' }}>Gợi ý (Placeholder):</label>
+                                                <input type="text" value={field.placeholder || ''} placeholder="Gợi ý cho khách..."
+                                                    onChange={e => { const arr = [...customizeFields]; arr[idx] = { ...arr[idx], placeholder: e.target.value }; setCustomizeFields(arr); }}
+                                                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', transition: 'border-color 0.2s' }}
+                                                    onFocus={e => e.target.style.borderColor = '#D4A373'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                                            </div>
+                                        )}
+                                        {field.fieldType !== 'select' && (
+                                            <div className="shop-form-group" style={{ marginBottom: 0 }}>
+                                                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px', display: 'block' }}>Max ký tự (Tùy chọn):</label>
+                                                <input type="number" value={field.maxLength || ''} placeholder="VD: 10"
+                                                    onChange={e => { const arr = [...customizeFields]; arr[idx] = { ...arr[idx], maxLength: e.target.value ? Number(e.target.value) : undefined }; setCustomizeFields(arr); }}
+                                                    style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none', transition: 'border-color 0.2s' }}
+                                                    onFocus={e => e.target.style.borderColor = '#D4A373'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {field.fieldType === 'select' && (() => {
+                                        const names = field.options ? field.options.split(',').map(o => o.trim()) : [];
+                                        const prices = field.optionPrices ? field.optionPrices.split(',').map(p => p.trim()) : [];
+                                        return (
+                                            <div className="shop-form-group" style={{ marginTop: '12px', marginBottom: 0, padding: '12px', background: '#f3f4f6', borderRadius: '8px' }}>
+                                                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px', display: 'block' }}>Các lựa chọn & Giá cộng thêm (VNĐ):</label>
+                                                {names.map((name, optIdx) => {
+                                                    const price = prices[optIdx] || '0';
+                                                    return (
+                                                        <div key={optIdx} style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                                                            <input type="text" value={name} placeholder="Tên lựa chọn (VD: Dây chốt vàng)"
+                                                                onChange={e => handleUpdateOption(idx, optIdx, e.target.value, price)}
+                                                                style={{ flex: 2, padding: '6px 10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none' }} />
+                                                            <input type="number" value={price === '0' ? '' : price} placeholder="Giá thêm (+đ)"
+                                                                onChange={e => handleUpdateOption(idx, optIdx, name, e.target.value)}
+                                                                style={{ flex: 1, padding: '6px 10px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '13px', outline: 'none' }} />
+                                                            <button type="button" onClick={() => handleDeleteOption(idx, optIdx)}
+                                                                style={{ border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', padding: '4px', fontSize: '13px', fontWeight: 600 }}>
+                                                                Xóa
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                                <button type="button" onClick={() => handleAddOption(idx)}
+                                                    style={{ marginTop: '4px', padding: '6px 12px', background: '#fff', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontWeight: 600, color: '#8B5E34' }}>
+                                                    + Thêm lựa chọn
+                                                </button>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            ))}
+
+                            <button type="button" 
+                                style={{ width: '100%', padding: '12px', border: '2px dashed #D4A373', borderRadius: '12px', background: '#fdfbf7', cursor: 'pointer', color: '#8B5E34', fontWeight: 600, transition: 'all 0.2s' }}
+                                onMouseOver={e => { e.target.style.background = '#f5ede3'; }}
+                                onMouseOut={e => { e.target.style.background = '#fdfbf7'; }}
+                                onClick={() => setCustomizeFields(prev => [...prev, { fieldLabel: '', fieldType: 'text', placeholder: '', options: '', isRequired: false }])}
+                            >
+                                <i className="fa-solid fa-plus" style={{marginRight: '8px'}}></i> Thêm trường mới
+                            </button>
+                        </div>
+
+                        <div className="shop-modal-actions" style={{ padding: '16px 24px', background: '#fff', borderTop: '1px solid #eae1d5', display: 'flex', gap: '12px' }}>
+                            <button type="button" className="btn-modal-cancel" onClick={() => setIsCustomizeModalOpen(false)}>Hủy</button>
+                            <button type="button" className="btn-primary" disabled={savingCustomize} onClick={async () => {
+                                setSavingCustomize(true);
+                                try {
+                                    const res = await fetch(`/api/shop/products/${customizeProductId}/customize-fields`, {
+                                        method: 'POST', credentials: 'include',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(customizeFields)
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                        alert('Đã lưu cấu hình tùy chỉnh thành công!');
+                                        setIsCustomizeModalOpen(false);
+                                    } else {
+                                        alert(data.message || 'Lỗi lưu');
+                                    }
+                                } catch (err) { alert('Lỗi hệ thống'); }
+                                setSavingCustomize(false);
+                            }}>
+                                {savingCustomize ? 'Đang lưu...' : 'Lưu cấu hình'}
+                            </button>
                         </div>
                     </div>
                 </div>

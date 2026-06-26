@@ -19,6 +19,7 @@ import com.project.web_hand_made_TMDT.dto.ProductDTO;
 import com.project.web_hand_made_TMDT.model.Comment;
 import com.project.web_hand_made_TMDT.model.Product;
 import com.project.web_hand_made_TMDT.model.User;
+import com.project.web_hand_made_TMDT.repository.ProductCustomizeFieldRepository;
 import com.project.web_hand_made_TMDT.repository.UserRepository;
 import com.project.web_hand_made_TMDT.service.ProductService;
 
@@ -32,6 +33,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final UserRepository userRepository;
+    private final ProductCustomizeFieldRepository customizeFieldRepository;
 
     @GetMapping("/products")
     public List<Product> getProducts() {
@@ -112,5 +114,10 @@ public class ProductController {
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    @GetMapping("/products/{id}/customize-fields")
+    public ResponseEntity<?> getProductCustomizeFields(@PathVariable("id") int id) {
+        return ResponseEntity.ok(customizeFieldRepository.findByProductIdOrderBySortOrderAsc(id));
     }
 }

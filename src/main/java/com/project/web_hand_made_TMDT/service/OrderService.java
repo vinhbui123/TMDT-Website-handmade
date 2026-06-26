@@ -60,6 +60,8 @@ public class OrderService {
                     .discountPercentage(item.getDiscount())
                     .discountAmount((int)(item.getPrice() * item.getDiscount() / 100.0 * item.getQuantity()))
                     .status(0)
+                    .customText(item.getCustomText())
+                    .selectedColor(item.getSelectedColor())
                     .build();
             orderDetailRepository.save(detail);
 
