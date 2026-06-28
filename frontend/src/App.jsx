@@ -13,6 +13,7 @@ import VNPayReturn from './components/VNPayReturn'
 import OrderHistory from './pages/OrderHistory'
 import ProductDetail from './pages/ProductDetail'
 import ShopDashboard from "./pages/ShopDashboard.jsx";
+import AdminVerifyShop from "./pages/AdminVerifyShop.jsx"; // BỔ SUNG IMPORT TRANG ADMIN
 
 // --- Các trang của Vinh (Incoming) ---
 import Login from './components/Login'
@@ -33,7 +34,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // CHỮA LỖI: Thêm quản lý trạng thái đóng/mở ChatWidget và sản phẩm tư vấn toàn cục
+  // Quản lý trạng thái đóng/mở ChatWidget và sản phẩm tư vấn toàn cục
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [activeProduct, setActiveProduct] = useState(null)
 
@@ -43,7 +44,7 @@ function App() {
     setIsChatOpen(true)
   }
 
-  // 1. Lấy thông tin User (Đính kèm token chống lỗi 401)
+  // 1. Lấy thông tin User
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
@@ -139,7 +140,7 @@ function App() {
 
       const res = await fetch('/api/cart/add', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ productId, quantity })
       })
       const data = await res.json()
@@ -202,7 +203,7 @@ function App() {
               <Route path="/vnpay-return" element={<VNPayReturn />} />
               <Route path="/order-history" element={<OrderHistory />} />
 
-              {/* CHỮA LỖI: Truyền hàm điều khiển chat vào ProductDetail */}
+              {/* Truyền hàm điều khiển chat vào ProductDetail */}
               <Route path="/product/:id" element={
                 <ProductDetail
                     user={user}
@@ -213,13 +214,16 @@ function App() {
 
               <Route path="/products" element={<ProductCategoryList />} />
               <Route path="/ShopDashBoard" element={<ShopDashboard />} />
+
+              {/* BỔ SUNG TUYẾN ĐƯỜNG ĐẾN TRANG ADMIN DUYỆT ĐƠN */}
+              <Route path="/admin/verify-shop" element={<AdminVerifyShop />} />
             </Routes>
           </main>
 
           <Footer />
           <Chatbot />
 
-          {/* CHỮA LỖI: Truyền đúng state đồng bộ của App vào đây */}
+          {/* Truyền đúng state đồng bộ của App vào đây */}
           <ChatWidget
               product={activeProduct}
               user={user}
