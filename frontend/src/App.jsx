@@ -214,7 +214,7 @@ function App() {
 
               <Route path="/products" element={<ProductCategoryList />} />
               <Route path="/ShopDashBoard" element={<ShopDashboard />} />
-
+                <Route path="/shop/:shopId" element={<ShopPage />} />
               {/* BỔ SUNG TUYẾN ĐƯỜNG ĐẾN TRANG ADMIN DUYỆT ĐƠN */}
               <Route path="/admin/verify-shop" element={<AdminVerifyShop />} />
             </Routes>
