@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -22,14 +28,18 @@ public class OrderReportController {
     private final OrderReportRepository orderReportRepository;
     private final OrderRepository orderRepository;
 
+    private static final String UPLOAD_DIR = "uploads/images/reports/";
+
     /**
      * Gửi báo cáo sự cố đơn hàng
      * POST /api/orders/{orderId}/report
      */
-    @PostMapping("/{orderId}/report")
+    @PostMapping(value = "/{orderId}/report", consumes = {"multipart/form-data"})
     public ResponseEntity<?> submitReport(
             @PathVariable("orderId") int orderId,
-            @RequestBody Map<String, Object> payload,
+            @RequestParam("reason") String reason,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "evidence", required = false) MultipartFile evidence,
             HttpServletRequest request) {
 
         // Lấy userId từ session
@@ -60,18 +70,36 @@ public class OrderReportController {
         }
 
         // Validate payload
-        String reason = payload.getOrDefault("reason", "").toString().trim();
-        String description = payload.getOrDefault("description", "").toString().trim();
-        if (reason.isEmpty()) {
+        if (reason == null || reason.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Vui lòng chọn lý do báo cáo"));
+        }
+
+        String evidenceUrl = null;
+        try {
+            if (evidence != null && !evidence.isEmpty()) {
+                File directory = new File(UPLOAD_DIR);
+                if (!directory.exists()) directory.mkdirs();
+                String originalFileName = evidence.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFileName != null && originalFileName.contains(".")) {
+                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                }
+                String newFileName = UUID.randomUUID().toString() + fileExtension;
+                Path path = Paths.get(UPLOAD_DIR + newFileName);
+                Files.write(path, evidence.getBytes());
+                evidenceUrl = "/images/reports/" + newFileName;
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Lỗi tải ảnh: " + e.getMessage()));
         }
 
         // Lưu báo cáo
         OrderReport report = OrderReport.builder()
                 .orderId(orderId)
                 .userId(userId)
-                .reason(reason)
-                .description(description)
+                .reason(reason.trim())
+                .description(description != null ? description.trim() : "")
+                .evidenceUrl(evidenceUrl)
                 .build();
         orderReportRepository.save(report);
 

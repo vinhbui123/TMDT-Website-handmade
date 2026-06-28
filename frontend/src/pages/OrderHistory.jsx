@@ -24,7 +24,7 @@ function OrderHistory() {
     const [loading, setLoading] = useState(true);
     const [reported, setReported] = useState({});        // { orderId: true/false }
     const [reportModal, setReportModal] = useState(null);    // orderId đang mở modal
-    const [reportForm, setReportForm] = useState({ reason: '', description: '' });
+    const [reportForm, setReportForm] = useState({ reason: '', description: '', evidence: null });
     const [submitting, setSubmitting] = useState(false);
     
     // States cho tính năng đánh giá sản phẩm
@@ -80,7 +80,7 @@ function OrderHistory() {
     };
 
     const openReportModal = (orderId) => {
-        setReportForm({ reason: '', description: '' });
+        setReportForm({ reason: '', description: '', evidence: null });
         setReportModal(orderId);
     };
 
@@ -91,11 +91,15 @@ function OrderHistory() {
         }
         setSubmitting(true);
         try {
+            const formData = new FormData();
+            formData.append('reason', reportForm.reason);
+            if (reportForm.description) formData.append('description', reportForm.description);
+            if (reportForm.evidence) formData.append('evidence', reportForm.evidence);
+
             const res = await fetch(`/api/orders/${reportModal}/report`, {
                 method: 'POST',
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reportForm),
+                body: formData,
             });
             const data = await res.json();
             if (data.success) {
@@ -369,6 +373,22 @@ function OrderHistory() {
                                     }}
                                     onFocus={e => e.target.style.borderColor = '#ee4d2d'}
                                     onBlur={e => e.target.style.borderColor = '#ddd'}
+                                />
+                            </div>
+
+                            {/* Bằng chứng */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#333' }}>Hình ảnh bằng chứng (tùy chọn)</div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => setReportForm(prev => ({ ...prev, evidence: e.target.files[0] }))}
+                                    style={{
+                                        width: '100%', padding: '10px 12px', borderRadius: '8px',
+                                        border: '1.5px solid #ddd', fontSize: '0.9rem',
+                                        boxSizing: 'border-box', fontFamily: 'inherit',
+                                        cursor: 'pointer'
+                                    }}
                                 />
                             </div>
 

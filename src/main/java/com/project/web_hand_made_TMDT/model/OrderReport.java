@@ -28,6 +28,9 @@ public class OrderReport {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "evidence_url")
+    private String evidenceUrl;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
