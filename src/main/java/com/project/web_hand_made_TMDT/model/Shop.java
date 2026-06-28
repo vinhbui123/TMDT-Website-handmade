@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
 import java.util.List;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(name = "shops")
@@ -48,7 +49,8 @@ public class Shop {
     @Column(name = "shop_address")
     private String shopAddress;
 
-    private Double rating = 0.0;
+    @Formula("(SELECT COALESCE(AVG(c.rating), 0) FROM comments c JOIN products p ON c.product_id = p.id WHERE p.shop_id = id)")
+    private Double rating;
 
     private Integer status = 1;
 
