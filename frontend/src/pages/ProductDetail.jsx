@@ -26,9 +26,6 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
     const [customRequestImgUrl, setCustomRequestImgUrl] = useState('');
     const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
 
-    // Review form state
-    const [rating, setRating] = useState(5);
-    const [reviewContent, setReviewContent] = useState('');
 
     useEffect(() => {
         fetchProductData();
@@ -225,28 +222,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
         );
     };
 
-    const submitReview = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await fetch(`/api/products/${id}/comments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rating, comment: reviewContent })
-            });
-            if (res.ok) {
-                alert('Đánh giá của bạn đã được gửi!');
-                setReviewContent('');
-                setRating(5);
-                fetchComments(); // Reload comments
-            } else if (res.status === 401) {
-                alert('Vui lòng đăng nhập để đánh giá.');
-            } else {
-                alert('Lỗi khi gửi đánh giá');
-            }
-        } catch (err) {
-            alert('Lỗi hệ thống');
-        }
-    };
+
 
     if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Đang tải...</div>;
     if (error) return <div style={{textAlign: 'center', padding: '50px', color: 'red'}}>Lỗi: {error}</div>;
@@ -421,29 +397,6 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     <span className="comment-count">{comments.length} đánh giá</span>
                 </div>
 
-                {/* Review Form */}
-                <div className="comment-form">
-                    <h3>Gửi đánh giá của bạn</h3>
-                    <form onSubmit={submitReview}>
-                        <div className="rating-select">
-                            <label>Chọn số sao:</label>
-                            <select value={rating} onChange={(e) => setRating(parseInt(e.target.value))}>
-                                <option value="5">5 Sao (Tuyệt vời)</option>
-                                <option value="4">4 Sao (Tốt)</option>
-                                <option value="3">3 Sao (Bình thường)</option>
-                                <option value="2">2 Sao (Kém)</option>
-                                <option value="1">1 Sao (Rất kém)</option>
-                            </select>
-                        </div>
-                        <textarea 
-                            value={reviewContent} 
-                            onChange={(e) => setReviewContent(e.target.value)} 
-                            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." 
-                            required 
-                        />
-                        <button type="submit" className="submit-comment">Gửi Đánh Giá</button>
-                    </form>
-                </div>
 
                 <div className="comment-list">
                     {comments.length > 0 ? comments.map((c, idx) => (

@@ -6,6 +6,7 @@ import com.project.web_hand_made_TMDT.model.User;
 import com.project.web_hand_made_TMDT.repository.OrderRepository;
 import com.project.web_hand_made_TMDT.repository.ShopRepository;
 import com.project.web_hand_made_TMDT.repository.UserRepository;
+import com.project.web_hand_made_TMDT.repository.OrderDetailRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ public class ShopOrderController {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ShopRepository shopRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     /**
      * Lấy danh sách đơn hàng có chứa sản phẩm của shop hiện tại.
@@ -81,8 +83,8 @@ public class ShopOrderController {
      */
     @PutMapping("/{id}/status")
     public ResponseEntity<?> updateOrderStatus(
-            @PathVariable int id,
-            @RequestParam int status,
+            @PathVariable("id") int id,
+            @RequestParam("status") int status,
             HttpServletRequest request) {
 
         Integer userId = getLoggedInUserId(request);
@@ -94,11 +96,17 @@ public class ShopOrderController {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Trạng thái không hợp lệ (0-4)"));
         }
 
-        return orderRepository.findById(id).map(order -> {
-            order.setStatus(status);
-            orderRepository.save(order);
-            return ResponseEntity.ok((Object) Map.of("success", true, "message", "Cập nhật trạng thái thành công"));
-        }).orElse(ResponseEntity.notFound().build());
+        if (!orderRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Cập nhật status cho orders bằng custom query (tránh conflict với @OneToMany orderDetails)
+        orderRepository.updateStatus(id, status);
+
+        // Cập nhật status cho tất cả order details
+        orderDetailRepository.updateStatusByOrderId(id, status);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "Cập nhật trạng thái thành công"));
     }
 
     /**
