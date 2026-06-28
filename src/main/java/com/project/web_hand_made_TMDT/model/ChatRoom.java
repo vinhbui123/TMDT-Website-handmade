@@ -1,9 +1,15 @@
 package com.project.web_hand_made_TMDT.model;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_rooms")
@@ -14,7 +20,7 @@ public class ChatRoom {
     private String id; // e.g., "1_2" where 1 is customerId and 2 is shopId
 
     @Column(name = "customer_id")
-    private Long customerId;
+    private int customerId;
 
     @Column(name = "customer_name")
     private String customerName;
@@ -23,7 +29,7 @@ public class ChatRoom {
     private String customerAvatar;
 
     @Column(name = "shop_id")
-    private Long shopId;
+    private int shopId;
 
     @Column(name = "shop_name")
     private String shopName;

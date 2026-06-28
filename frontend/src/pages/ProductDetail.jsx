@@ -342,29 +342,15 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
 
                     <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                         {/* CHỮA LỖI: Gọi hàm openChat truyền ngược data sản phẩm lên App.jsx */}
-                        <button
-                            className="chat-now-btn"
-                            onClick={() => openChat && openChat(product)}
-                            style={{
-                                backgroundColor: 'rgba(238, 77, 45, 0.1)',
-                                color: '#ee4d2d',
-                                border: '1px solid #ee4d2d',
-                                padding: '0 15px',
-                                height: '48px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                minWidth: '95px',
-                                fontSize: '14px',
-                                gap: '2px'
-                            }}
-                        >
-                            <i className="far fa-comment-dots" style={{ fontSize: '18px' }}></i>
-                            <span>Chat ngay</span>
-                        </button>
+                        {(!user?.id || String(user.id) !== String(product?.shop?.userId || product?.shop_id || product?.user_id || product?.userId || product?.shop?.id || product?.id_user)) && (
+                            <button
+                                className="chat-now-btn"
+                                onClick={() => openChat && openChat(product)}
+                            >
+                                <i className="far fa-comment-dots" style={{ fontSize: '18px' }}></i>
+                                <span>Chat ngay</span>
+                            </button>
+                        )}
 
                         <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1 }}>
                             <i className="fa-solid fa-cart-plus" style={{marginRight: 5}}></i>Thêm Vào Giỏ Hàng

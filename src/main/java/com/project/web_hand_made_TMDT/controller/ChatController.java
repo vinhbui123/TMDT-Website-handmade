@@ -17,8 +17,13 @@ public class ChatController {
     private ChatService chatService;
 
     @GetMapping("/rooms/{userId}")
-    public ResponseEntity<List<ChatRoom>> getRooms(@PathVariable("userId") Long userId) {
+    public ResponseEntity<List<ChatRoom>> getRooms(@PathVariable("userId") int userId) {
         return ResponseEntity.ok(chatService.getRoomsForUser(userId));
+    }
+
+    @GetMapping("/rooms/{roomId}/shop-name")
+    public ResponseEntity<String> getShopName(@PathVariable("roomId") String roomId) {
+        return ResponseEntity.ok(chatService.findShopNameByRoomId(roomId));
     }
 
     @GetMapping("/rooms/{roomId}/messages")
@@ -27,7 +32,7 @@ public class ChatController {
     }
 
     @PostMapping("/rooms/{roomId}/read")
-    public ResponseEntity<?> markAsRead(@PathVariable("roomId") String roomId, @RequestParam("userId") Long userId) {
+    public ResponseEntity<?> markAsRead(@PathVariable("roomId") String roomId, @RequestParam("userId") int userId) {
         chatService.markMessagesAsSeen(roomId, userId);
         return ResponseEntity.ok().build();
     }

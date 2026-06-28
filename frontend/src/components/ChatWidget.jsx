@@ -35,7 +35,7 @@ const ChatWidget = ({ product, user, isOpen: externalIsOpen, setIsOpen: external
 
     const isActingAsBuyerForCurrentProduct = currentUserId && shopOwnerId && (currentUserId !== shopOwnerId);
 
-    const activeProductRoomId = (currentUserId && shopOwnerId)
+    const activeProductRoomId = (currentUserId && shopOwnerId && (currentUserId !== shopOwnerId))
         ? [currentUserId, shopOwnerId].sort().join("_")
         : null;
 
@@ -82,6 +82,19 @@ const ChatWidget = ({ product, user, isOpen: externalIsOpen, setIsOpen: external
                 // Lắng nghe cập nhật phòng (khi có tin nhắn mới cho user này)
                 client.subscribe(`/topic/user/${currentUserId}/rooms`, (msg) => {
                     fetchRooms();
+                });
+
+                // Lắng nghe lỗi hệ thống (ví dụ: bị chặn do từ ngữ thô tục)
+                client.subscribe(`/topic/user/${currentUserId}/errors`, (msg) => {
+                    const errorText = msg.body;
+                    setMessages(prev => [...prev, {
+                        id: 'err_' + Date.now(),
+                        senderId: 'system',
+                        type: 'text',
+                        text: errorText,
+                        isError: true
+                    }]);
+                    setTimeout(scrollToBottom, 100);
                 });
             }
         });
@@ -174,7 +187,7 @@ const ChatWidget = ({ product, user, isOpen: externalIsOpen, setIsOpen: external
                 customerAvatar: amIBuyerInThisRoom ? currentUserAvatar : (existingRoom?.customerAvatar || ""),
 
                 // Thông tin Cửa hàng
-                shopId: !amIBuyerInThisRoom ? Number(currentUserId) : Number(shopOwnerId),
+                shopId: !amIBuyerInThisRoom ? Number(currentUserId) : (existingRoom?.shopId || Number(shopOwnerId)),
                 shopName: !amIBuyerInThisRoom ? currentUserName : (existingRoom?.shopName || shopOwnerName)
             };
 
@@ -307,7 +320,7 @@ const ChatWidget = ({ product, user, isOpen: externalIsOpen, setIsOpen: external
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#f9f9f9' }}>
                         <div style={{ padding: '12px', backgroundColor: '#fff', borderBottom: '1px solid #ececec', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
-                                {iAmBuyerInSelectedRoom ? `Mua hàng từ: ${opposingName}` : `Khách hàng: ${opposingName}`}
+                                {!currentUserId ? 'Vui lòng đăng nhập' : (opposingName ? (iAmBuyerInSelectedRoom ? `Shop: ${opposingName}` : `Khách hàng: ${opposingName}`) : 'Tin nhắn')}
                             </span>
                             <span onClick={() => setIsOpen(false)} style={{ cursor: 'pointer', color: '#888', fontSize: '13px' }}>Thu nhỏ ▽</span>
                         </div>
@@ -333,7 +346,20 @@ const ChatWidget = ({ product, user, isOpen: externalIsOpen, setIsOpen: external
                         <div style={{ flex: 1, padding: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {messages.map((msg) => {
                                 const isMe = String(msg.senderId) === currentUserId;
+                                const isSystem = msg.senderId === 'system';
                                 const prodInfo = msg.productInfo ? JSON.parse(msg.productInfo) : null;
+                                
+                                if (isSystem) {
+                                    return (
+                                        <div key={msg.id} style={{ alignSelf: 'center', margin: '8px 0' }}>
+                                            <div style={{ backgroundColor: '#fff', color: '#ee4d2d', padding: '6px 12px', borderRadius: '15px', fontSize: '12px', border: '1px solid #ee4d2d', textAlign: 'center', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 1px 3px rgba(238,77,45,0.1)' }}>
+                                                <i className="fas fa-exclamation-circle"></i>
+                                                {msg.text}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
                                 return (
                                     <div key={msg.id} style={{ alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth: '75%', display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
                                         <div style={{ backgroundColor: isMe ? '#ffe3e0' : '#fff', color: '#333', padding: '10px 14px', borderRadius: '8px', fontSize: '14px', border: '1px solid #e0e0e0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>

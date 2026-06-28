@@ -143,27 +143,59 @@
 }
 
 .btn-box button {
-    font-size: 18px;
-    padding: 8px 25px;
+    font-size: 16px;
+    height: 48px;
+    padding: 0 15px;
     outline: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    color: black;
-    border: 1px solid #ff5e00;
-    transition: background-color 0.3s ease;
+    border: 1px solid #ee4d2d;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.chat-now-btn {
+    background-color: rgba(238, 77, 45, 0.1);
+    color: #ee4d2d;
+    flex-direction: column;
+    min-width: 80px;
+    padding: 0 10px;
+    gap: 2px;
+}
+.chat-now-btn i {
+    font-size: 18px;
+}
+.chat-now-btn span {
+    font-size: 12px;
+}
+.chat-now-btn:hover {
+    background-color: rgba(238, 77, 45, 0.18) !important;
+    border-color: #d73d1f;
 }
 
 .cart-btn {
-    background-color: white;
-    margin-right: 20px;
+    background-color: #ffefe8;
+    color: #ee4d2d;
+}
+.cart-btn:hover {
+    background-color: #ffe0d1;
+    color: #d73d1f;
 }
 
 .buy-btn {
-    background-color: rgba(248, 115, 38, 0.93);
+    background-color: #ee4d2d;
+    color: white;
+}
+.buy-btn:hover {
+    background-color: #d73d1f;
+    box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
 }
 
 .btn-box button:hover {
-    background-color: #ff3c00;
+    transform: translateY(-2px);
 }
 
 /* Description container */
