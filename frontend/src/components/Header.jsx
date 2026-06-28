@@ -150,7 +150,7 @@ function Header({ user, categories, cartCount }) {
 
             {/* Admin Button */}
             {user && user.role === 1 && (
-              <a href="/admin/verify-shop" className="header-role-btn admin-btn">
+              <a href="/adminProducts" className="header-role-btn admin-btn">
                 <i className="fa-solid fa-user-tie"></i>
                 <span>Quản Trị</span>
               </a>
