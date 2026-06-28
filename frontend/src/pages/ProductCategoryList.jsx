@@ -100,8 +100,12 @@ function ProductCategoryList() {
           <div className="card-image-wrapper">
             {/* Đảm bảo đường dẫn ảnh khớp với thuộc tính trong DB của bạn (ví dụ: product.thumbnail hoặc product.image) */}
             <img
-              src={`${product.img}` || "https://via.placeholder.com/300"}
+              src={`${product.img}` || "https://placehold.co/300x300?text=No+Image"}
               alt={product.name}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://placehold.co/300x300?text=No+Image";
+              }}
             />
             <button className="wishlist-btn">
               <span className="material-symbols-outlined">favorite</span>

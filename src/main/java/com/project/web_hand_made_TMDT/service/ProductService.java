@@ -157,4 +157,11 @@ public class ProductService {
         
         return commentRepository.save(comment);
     }
+
+    public List<ProductDTO> getProductsByShopId(int shopId) {
+        List<Product> products = productRepository.findByShopId(shopId);
+        return products.stream()
+                .map(this::convertToDTO)
+                .toList();
+    }
 }

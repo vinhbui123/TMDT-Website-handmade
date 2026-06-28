@@ -120,4 +120,10 @@ public class ProductController {
     public ResponseEntity<?> getProductCustomizeFields(@PathVariable("id") int id) {
         return ResponseEntity.ok(customizeFieldRepository.findByProductIdOrderBySortOrderAsc(id));
     }
+
+    @GetMapping("/products/shop/{shopId}")
+    public ResponseEntity<List<ProductDTO>> getProductsByShopId(@PathVariable("shopId") int shopId) {
+        List<ProductDTO> products = productService.getProductsByShopId(shopId);
+        return ResponseEntity.ok(products);
+    }
 }

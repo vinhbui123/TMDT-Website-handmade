@@ -84,7 +84,7 @@ function ProductList({ products, onAddToCart }) {
                       alt={product.name}
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/200?text=No+Image";
+                        e.target.src = "https://placehold.co/200x200?text=No+Image";
                       }}
                   />
                 </div>

@@ -50,6 +50,10 @@ public class UserCustomRequestController {
                 return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Sản phẩm này chưa thuộc về shop nào"));
             }
 
+            if (product.getShop().getOwnerId() != null && product.getShop().getOwnerId().equals(userId)) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Bạn không thể gửi yêu cầu thiết kế cho chính sản phẩm của shop mình"));
+            }
+
             int shopId = product.getShop().getId();
 
             CustomRequest customRequest = CustomRequest.builder()

@@ -19,8 +19,12 @@ public class ChatService {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
-    public List<ChatRoom> getRoomsForUser(Long userId) {
+    public List<ChatRoom> getRoomsForUser(int userId) {
         return chatRoomRepository.findByUserIdOrderByUpdatedAtDesc(userId);
+    }
+
+    public String findShopNameByRoomId(String roomId) {
+        return chatRoomRepository.findShopNameByRoomId(roomId);
     }
 
     public List<ChatMessage> getMessagesForRoom(String roomId) {
@@ -28,7 +32,7 @@ public class ChatService {
     }
 
     @Transactional
-    public void markMessagesAsSeen(String roomId, Long currentUserId) {
+    public void markMessagesAsSeen(String roomId, int currentUserId) {
         chatMessageRepository.markMessagesAsSeen(roomId, currentUserId);
         ChatRoom room = chatRoomRepository.findById(roomId).orElse(null);
         if (room != null && room.getUnreadCount() > 0) {

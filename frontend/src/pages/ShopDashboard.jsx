@@ -191,13 +191,24 @@ export default function ShopDashboard() {
     const handleSaveProfile = async (e) => {
         e.preventDefault();
         try {
+            const formData = new FormData();
+            formData.append('shopName', profile.shopName || '');
+            if (profile.description) formData.append('description', profile.description);
+            if (profile.shopAddress) formData.append('shopAddress', profile.shopAddress);
+            if (profile.logoFile) formData.append('file', profile.logoFile);
+
             const res = await fetch(`/api/shop/profile/me`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST',
                 credentials: 'include',
-                body: JSON.stringify(profile)
+                body: formData
             });
-            if (res.ok) alert('Cập nhật hồ sơ thành công!');
+            if (res.ok) {
+                const data = await res.json();
+                setProfile({ ...profile, shopLogo: data.data?.shopLogo || profile.shopLogo, logoFile: null });
+                alert('Cập nhật hồ sơ thành công!');
+            } else {
+                alert('Có lỗi xảy ra khi cập nhật hồ sơ!');
+            }
         } catch (err) { console.error(err); }
     };
 
@@ -473,9 +484,45 @@ export default function ShopDashboard() {
                                 <div className="shop-profile-card">
                                     <h2>Thông tin Cửa hàng</h2>
                                     <form onSubmit={handleSaveProfile} className="shop-form">
+                                        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', alignItems: 'center' }}>
+                                            <div style={{ position: 'relative', width: '100px', height: '100px', flexShrink: 0 }}>
+                                                <img 
+                                                    src={profile.logoPreview || profile.shopLogo || 'https://placehold.co/100x100?text=Logo'} 
+                                                    alt="Shop Logo" 
+                                                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ee4d2d' }} 
+                                                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100?text=Logo'; }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Logo Cửa hàng</label>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            setProfile({ 
+                                                                ...profile, 
+                                                                logoFile: file, 
+                                                                logoPreview: URL.createObjectURL(file) 
+                                                            });
+                                                        }
+                                                    }}
+                                                    style={{ fontSize: '14px' }}
+                                                />
+                                            </div>
+                                        </div>
                                         <div className="shop-form-group">
                                             <label>Tên shop</label>
                                             <input type="text" value={profile.shopName} onChange={e => setProfile({ ...profile, shopName: e.target.value })} required />
+                                        </div>
+                                        <div className="shop-form-group">
+                                            <label>Địa chỉ cửa hàng</label>
+                                            <input type="text" value={profile.shopAddress || ''} onChange={e => setProfile({ ...profile, shopAddress: e.target.value })} required />
+                                        </div>
+                                        <div className="shop-form-group">
+                                            <label>Mô tả shop</label>
+                                            <textarea rows="4" value={profile.description || ''} onChange={e => setProfile({ ...profile, description: e.target.value })} required />
                                         </div>
                                         <button type="submit" className="btn-save-profile">Lưu thay đổi hồ sơ</button>
                                     </form>

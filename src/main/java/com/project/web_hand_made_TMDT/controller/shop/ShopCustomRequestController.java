@@ -77,7 +77,7 @@ public class ShopCustomRequestController {
     @PutMapping("/{id}/quote")
     public ResponseEntity<?> quoteCustomRequest(
             @PathVariable int id,
-            @RequestBody Map<String, Integer> payload,
+            @RequestBody Map<String, Object> payload,
             HttpServletRequest request) {
 
         Integer userId = getLoggedInUserId(request);
@@ -90,21 +90,23 @@ public class ShopCustomRequestController {
             return ResponseEntity.status(400).body(Map.of("success", false, "message", "Chưa có thông tin shop"));
         }
 
-        Integer quotedPrice = payload.get("quotedPrice");
-        if (quotedPrice == null || quotedPrice < 0) {
+        Integer quotedPrice = null;
+        try {
+            quotedPrice = Integer.parseInt(payload.get("quotedPrice").toString());
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Giá báo không hợp lệ"));
         }
 
-        return customRequestRepository.findById(id).map(customRequest -> {
-            if (customRequest.getShopId() != shopOpt.get().getId()) {
-                throw new RuntimeException("Không có quyền cập nhật yêu cầu này");
-            }
-            
-            customRequest.setQuotedPrice(quotedPrice);
-            customRequest.setStatus(1); // 1: QUOTED (Đã báo giá)
-            customRequestRepository.save(customRequest);
+        if (quotedPrice < 0) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Giá báo không hợp lệ"));
+        }
+
+        int updated = customRequestRepository.updateQuote(id, shopOpt.get().getId(), quotedPrice);
+        if (updated > 0) {
             return ResponseEntity.ok((Object) Map.of("success", true, "message", "Đã gửi báo giá thành công"));
-        }).orElse(ResponseEntity.notFound().build());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private Integer getLoggedInUserId(HttpServletRequest request) {

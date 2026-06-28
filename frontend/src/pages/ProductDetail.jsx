@@ -26,9 +26,6 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
     const [customRequestImgUrl, setCustomRequestImgUrl] = useState('');
     const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
 
-    // Review form state
-    const [rating, setRating] = useState(5);
-    const [reviewContent, setReviewContent] = useState('');
 
     useEffect(() => {
         fetchProductData();
@@ -225,28 +222,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
         );
     };
 
-    const submitReview = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await fetch(`/api/products/${id}/comments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rating, comment: reviewContent })
-            });
-            if (res.ok) {
-                alert('Đánh giá của bạn đã được gửi!');
-                setReviewContent('');
-                setRating(5);
-                fetchComments(); // Reload comments
-            } else if (res.status === 401) {
-                alert('Vui lòng đăng nhập để đánh giá.');
-            } else {
-                alert('Lỗi khi gửi đánh giá');
-            }
-        } catch (err) {
-            alert('Lỗi hệ thống');
-        }
-    };
+
 
     if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Đang tải...</div>;
     if (error) return <div style={{textAlign: 'center', padding: '50px', color: 'red'}}>Lỗi: {error}</div>;
@@ -340,36 +316,13 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     {/* HIỂN THỊ KHU VỰC CUSTOMIZE DYNAMIC */}
                     {renderDynamicCustomizeFields()}
 
-                    <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        {/* CHỮA LỖI: Gọi hàm openChat truyền ngược data sản phẩm lên App.jsx */}
-                        <button
-                            className="chat-now-btn"
-                            onClick={() => openChat && openChat(product)}
-                            style={{
-                                backgroundColor: 'rgba(238, 77, 45, 0.1)',
-                                color: '#ee4d2d',
-                                border: '1px solid #ee4d2d',
-                                padding: '0 15px',
-                                height: '48px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                minWidth: '95px',
-                                fontSize: '14px',
-                                gap: '2px'
-                            }}
-                        >
-                            <i className="far fa-comment-dots" style={{ fontSize: '18px' }}></i>
-                            <span>Chat ngay</span>
+                    <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
+                        <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1, padding: '12px 0', fontSize: '16px' }}>
+                            <i className="fa-solid fa-cart-plus" style={{marginRight: 8}}></i>Thêm Vào Giỏ Hàng
                         </button>
-
-                        <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1 }}>
-                            <i className="fa-solid fa-cart-plus" style={{marginRight: 5}}></i>Thêm Vào Giỏ Hàng
+                        <button className="buy-btn" onClick={handleBuyNow} style={{ flex: 1, padding: '12px 0', fontSize: '16px' }}>
+                            Mua Ngay
                         </button>
-                        <button className="buy-btn" onClick={handleBuyNow} style={{ flex: 1 }}>Mua Ngay</button>
                     </div>
 
                     {/* Chỉ hiện nút Yêu cầu Thiết kế Riêng nếu sản phẩm có chất liệu đặc biệt */}
@@ -386,6 +339,9 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                             .map(m => specialMaterialMap[m.name.trim().toLowerCase()]);
 
                         if (matchedSpecials.length === 0) return null;
+
+                        const isSeller = user?.id && String(user.id) === String(product?.shop?.userId || product?.shop?.id || product?.userId || product?.shop_id || product?.id_user);
+                        if (isSeller) return null;
 
                         return (
                             <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
@@ -409,6 +365,66 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     })()}
                 </div>
             </div>
+
+            {/* SHOP INFO SECTION (SHOPEE STYLE) */}
+            {product.shop && (
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '20px 30px', margin: '20px auto', background: '#fff', 
+                    borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                    maxWidth: '1200px'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <div style={{ position: 'relative' }}>
+                            <img 
+                                src={product.shop.shopLogo || 'https://placehold.co/80x80?text=Shop'} 
+                                alt={product.shop.shopName} 
+                                style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }}
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/80x80?text=Shop'; }}
+                            />
+                            {product.shop.status === 1 && (
+                                <span style={{
+                                    position: 'absolute', bottom: 0, right: 0, background: '#ee4d2d', 
+                                    color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold'
+                                }}>Mall</span>
+                            )}
+                        </div>
+                        <div>
+                            <h3 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', color: '#333', fontWeight: '500' }}>{product.shop.shopName}</h3>
+                            <div style={{ display: 'flex', gap: '20px', fontSize: '0.9rem', color: '#757575' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <i className="fas fa-star" style={{ color: '#ffce3d' }}></i> Đánh giá: <span style={{ color: '#ee4d2d' }}>{Number(product.shop.rating || 0).toFixed(1)}</span>
+                                </span>
+                                <span style={{ borderLeft: '1px solid #ddd', paddingLeft: '20px' }}>
+                                    Sản phẩm: <span style={{ color: '#ee4d2d' }}>{product.shop.products?.length || 'Đang cập nhật'}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        {(!user?.id || String(user.id) !== String(product.shop.userId || product.shop.id || product.userId || product.shop_id || product.id_user)) && (
+                            <button 
+                                onClick={() => openChat && openChat(product)}
+                                style={{ 
+                                    padding: '10px 20px', border: '1px solid #ee4d2d', background: '#fff5f3', 
+                                    color: '#ee4d2d', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
+                                }}
+                            >
+                                <i className="fas fa-comments"></i> Chat Ngay
+                            </button>
+                        )}
+                        <button 
+                            onClick={() => window.location.href = `/shop/${product.shop.id}`}
+                            style={{ 
+                                padding: '10px 20px', border: '1px solid #e0e0e0', background: '#fff', 
+                                color: '#555', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
+                            }}
+                        >
+                            <i className="fas fa-store"></i> Xem Shop
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="describe-container">
                 <h2>MÔ TẢ CHI TIẾT</h2>
@@ -435,29 +451,6 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     <span className="comment-count">{comments.length} đánh giá</span>
                 </div>
 
-                {/* Review Form */}
-                <div className="comment-form">
-                    <h3>Gửi đánh giá của bạn</h3>
-                    <form onSubmit={submitReview}>
-                        <div className="rating-select">
-                            <label>Chọn số sao:</label>
-                            <select value={rating} onChange={(e) => setRating(parseInt(e.target.value))}>
-                                <option value="5">5 Sao (Tuyệt vời)</option>
-                                <option value="4">4 Sao (Tốt)</option>
-                                <option value="3">3 Sao (Bình thường)</option>
-                                <option value="2">2 Sao (Kém)</option>
-                                <option value="1">1 Sao (Rất kém)</option>
-                            </select>
-                        </div>
-                        <textarea 
-                            value={reviewContent} 
-                            onChange={(e) => setReviewContent(e.target.value)} 
-                            placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." 
-                            required 
-                        />
-                        <button type="submit" className="submit-comment">Gửi Đánh Giá</button>
-                    </form>
-                </div>
 
                 <div className="comment-list">
                     {comments.length > 0 ? comments.map((c, idx) => (

@@ -20,7 +20,7 @@ public class ChatMessage {
     private ChatRoom chatRoom;
 
     @Column(name = "sender_id")
-    private Long senderId;
+    private int senderId;
 
     @Column(name = "sender_name")
     private String senderName;

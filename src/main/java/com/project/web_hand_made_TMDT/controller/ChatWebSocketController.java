@@ -1,15 +1,15 @@
 package com.project.web_hand_made_TMDT.controller;
 
-import com.project.web_hand_made_TMDT.model.ChatMessage;
-import com.project.web_hand_made_TMDT.model.ChatRoom;
-import com.project.web_hand_made_TMDT.model.ChatPayload;
-import com.project.web_hand_made_TMDT.service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
+import com.project.web_hand_made_TMDT.model.ChatMessage;
+import com.project.web_hand_made_TMDT.model.ChatPayload;
+import com.project.web_hand_made_TMDT.model.ChatRoom;
+import com.project.web_hand_made_TMDT.service.ChatService;
+import com.project.web_hand_made_TMDT.util.ChatWordFilter;
 
 @Controller
 public class ChatWebSocketController {
@@ -36,8 +36,17 @@ public class ChatWebSocketController {
         msg.setSenderName(payload.getSenderName());
         msg.setSenderRole(payload.getSenderRole());
         msg.setType(payload.getType());
-        msg.setText(payload.getText());
         msg.setProductInfo(payload.getProductInfo());
+        
+        // Kiểm tra từ ngữ thô tục (giống tính năng Shopee)
+        if (payload.getText() != null && ChatWordFilter.hasBadWords(payload.getText())) {
+            // Không lưu vào DB, gửi thông báo lỗi trả lại cho người gửi
+            messagingTemplate.convertAndSend("/topic/user/" + payload.getSenderId() + "/errors", 
+                "Tin nhắn của bạn chứa từ ngữ vi phạm Tiêu chuẩn cộng đồng và không thể gửi.");
+            return;
+        }
+        
+        msg.setText(payload.getText());
 
         ChatMessage savedMsg = chatService.saveMessage(msg, roomData);
 
