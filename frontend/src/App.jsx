@@ -12,6 +12,7 @@ import Checkout from './pages/Checkout'
 import VNPayReturn from './components/VNPayReturn'
 import OrderHistory from './pages/OrderHistory'
 import ProductDetail from './pages/ProductDetail'
+import ShopPage from './pages/ShopPage'
 import ShopDashboard from "./pages/ShopDashboard.jsx";
 import AdminVerifyShop from "./pages/AdminVerifyShop.jsx"; // BỔ SUNG IMPORT TRANG ADMIN
 
@@ -213,6 +214,7 @@ function App() {
               } />
 
               <Route path="/products" element={<ProductCategoryList />} />
+              <Route path="/shop/:id" element={<ShopPage />} />
               <Route path="/ShopDashBoard" element={<ShopDashboard />} />
 
               {/* BỔ SUNG TUYẾN ĐƯỜNG ĐẾN TRANG ADMIN DUYỆT ĐƠN */}

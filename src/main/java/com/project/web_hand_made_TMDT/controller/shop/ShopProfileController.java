@@ -9,6 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.Map;
 
 @RestController
@@ -39,7 +45,7 @@ public class ShopProfileController {
      * Lấy thông tin shop profile theo shopId.
      */
     @GetMapping("/{shopId}")
-    public ResponseEntity<?> getShopProfile(@PathVariable int shopId) {
+    public ResponseEntity<?> getShopProfile(@PathVariable("shopId") int shopId) {
         return shopRepository.findById(shopId)
                 .map(shop -> ResponseEntity.ok((Object) shop))
                 .orElse(ResponseEntity.notFound().build());
@@ -49,9 +55,14 @@ public class ShopProfileController {
      * Cập nhật thông tin shop.
      * Nếu user chưa có shop thì tạo mới.
      */
-    @PutMapping("/me")
+    private static final String UPLOAD_DIR = "uploads/images/logos/";
+
+    @PostMapping("/me")
     public ResponseEntity<?> updateShopProfile(
-            @RequestBody Shop shopDetails,
+            @RequestParam("shopName") String shopName,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "shopAddress", required = false) String shopAddress,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             HttpServletRequest request) {
 
         Integer loggedInUserId = getLoggedInUserId(request);
@@ -61,17 +72,35 @@ public class ShopProfileController {
 
         Shop shop = shopRepository.findByUserId(loggedInUserId).orElseGet(() -> {
             Shop newShop = new Shop();
-            // Assign the user reference.
             com.project.web_hand_made_TMDT.model.User user = new com.project.web_hand_made_TMDT.model.User();
             user.setId(loggedInUserId);
             newShop.setUser(user);
             return newShop;
         });
 
-        if (shopDetails.getShopName() != null) shop.setShopName(shopDetails.getShopName());
-        if (shopDetails.getDescription() != null) shop.setDescription(shopDetails.getDescription());
-        if (shopDetails.getShopAddress() != null) shop.setShopAddress(shopDetails.getShopAddress());
-        if (shopDetails.getShopLogo() != null) shop.setShopLogo(shopDetails.getShopLogo());
+        if (shopName != null) shop.setShopName(shopName);
+        if (description != null) shop.setDescription(description);
+        if (shopAddress != null) shop.setShopAddress(shopAddress);
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                File directory = new File(UPLOAD_DIR);
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                String originalFileName = file.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFileName != null && originalFileName.contains(".")) {
+                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+                }
+                String newFileName = UUID.randomUUID().toString() + fileExtension;
+                Path path = Paths.get(UPLOAD_DIR + newFileName);
+                Files.write(path, file.getBytes());
+                shop.setShopLogo("/images/logos/" + newFileName);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("success", false, "message", "Lỗi tải ảnh: " + e.getMessage()));
+        }
 
         Shop savedShop = shopRepository.save(shop);
         return ResponseEntity.ok(Map.of("success", true, "data", savedShop));

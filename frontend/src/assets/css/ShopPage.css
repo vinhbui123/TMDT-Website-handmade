@@ -1,0 +1,131 @@
+.shop-page-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+/* Shop Banner Header */
+.shop-banner {
+    background: linear-gradient(135deg, #ffefe8 0%, #fff 100%);
+    border: 1px solid #ee4d2d;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(238, 77, 45, 0.08);
+}
+
+.shop-banner-info {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.shop-avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+}
+
+.shop-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.shop-mall-badge {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ee4d2d;
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(238, 77, 45, 0.4);
+}
+
+.shop-details h2 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+}
+
+.shop-desc {
+    color: #666;
+    margin: 0 0 15px 0;
+    font-size: 15px;
+    max-width: 800px;
+    line-height: 1.5;
+}
+
+.shop-stats {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #555;
+    font-size: 15px;
+}
+
+.stat-item i {
+    color: #ee4d2d;
+    font-size: 16px;
+}
+
+.stat-item strong {
+    color: #ee4d2d;
+    font-weight: 600;
+}
+
+/* Shop Products Section */
+.shop-products-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 0;
+}
+
+.section-title {
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.section-title h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title h3::after {
+    content: '';
+    position: absolute;
+    bottom: -21px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #ee4d2d;
+}
+
+/* Override ProductList styles if necessary to fit nicely in this page */
+.shop-products-section .product-body-container {
+    padding: 0 20px;
+}
+
+.shop-products-section .product-section-title {
+    display: none; /* Hide default ProductList title since we have our own */
+}

@@ -19,6 +19,10 @@ public class Shop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    public Integer getId() {
+        return id;
+    }
+
     @OneToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore

@@ -12,14 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/shop/orders")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class ShopOrderController {
 
@@ -27,6 +25,14 @@ public class ShopOrderController {
     private final UserRepository userRepository;
     private final ShopRepository shopRepository;
     private final OrderDetailRepository orderDetailRepository;
+
+    public ShopOrderController(OrderRepository orderRepository, UserRepository userRepository, 
+                               ShopRepository shopRepository, OrderDetailRepository orderDetailRepository) {
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
+        this.shopRepository = shopRepository;
+        this.orderDetailRepository = orderDetailRepository;
+    }
 
     /**
      * Lấy danh sách đơn hàng có chứa sản phẩm của shop hiện tại.
