@@ -4,17 +4,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.nio.file.Paths;
-
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
     private AuthInterceptor authInterceptor;
 
-    // 1. CẤU HÌNH CORS
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
@@ -24,7 +20,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
     }
 
-    // 2. CẤU HÌNH INTERCEPTOR BẢO MẬT
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
