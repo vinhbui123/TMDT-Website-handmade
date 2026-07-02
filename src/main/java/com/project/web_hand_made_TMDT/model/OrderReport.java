@@ -28,6 +28,12 @@ public class OrderReport {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "evidence_url")
+    private String evidenceUrl;
+
+    @Column(name = "status")
+    private int status; // 0 = Chờ xử lý, 1 = Đã chấp nhận, 2 = Đã từ chối
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

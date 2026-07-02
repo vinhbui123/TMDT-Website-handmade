@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import '../assets/css/review-modal.css';
 
 const STATUS_MAP = {
-    0: { label: '🕒 Chờ xác nhận', color: '#ff9f43' },
-    1: { label: '✅ Đã duyệt', color: '#1dd1a1' },
-    2: { label: '🚚 Đang giao', color: '#54a0ff' },
+    0: { label: 'Chờ xác nhận', color: '#ff9f43' },
+    1: { label: 'Đã duyệt', color: '#1dd1a1' },
+    2: { label: 'Đang giao', color: '#54a0ff' },
     3: { label: 'Hoàn thành', color: '#2ecc71' },
-    4: { label: '❌ Đã hủy', color: '#ee5a24' },
+    4: { label: 'Đã hủy', color: '#ee5a24' },
 };
 
 const REPORT_REASONS = [
@@ -24,9 +24,9 @@ function OrderHistory() {
     const [loading, setLoading] = useState(true);
     const [reported, setReported] = useState({});        // { orderId: true/false }
     const [reportModal, setReportModal] = useState(null);    // orderId đang mở modal
-    const [reportForm, setReportForm] = useState({ reason: '', description: '' });
+    const [reportForm, setReportForm] = useState({ reason: '', description: '', evidence: null });
     const [submitting, setSubmitting] = useState(false);
-    
+
     // States cho tính năng đánh giá sản phẩm
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
     const [reviewProduct, setReviewProduct] = useState(null);
@@ -80,22 +80,26 @@ function OrderHistory() {
     };
 
     const openReportModal = (orderId) => {
-        setReportForm({ reason: '', description: '' });
+        setReportForm({ reason: '', description: '', evidence: null });
         setReportModal(orderId);
     };
 
     const handleSubmitReport = async () => {
         if (!reportForm.reason) {
-            alert('Vui lòng chọn lý do báo cáo!');
+            alert('Vui lòng chọn lý do trả hàng/hoàn tiền!');
             return;
         }
         setSubmitting(true);
         try {
+            const formData = new FormData();
+            formData.append('reason', reportForm.reason);
+            if (reportForm.description) formData.append('description', reportForm.description);
+            if (reportForm.evidence) formData.append('evidence', reportForm.evidence);
+
             const res = await fetch(`/api/orders/${reportModal}/report`, {
                 method: 'POST',
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reportForm),
+                body: formData,
             });
             const data = await res.json();
             if (data.success) {
@@ -127,6 +131,7 @@ function OrderHistory() {
         try {
             const res = await fetch(`/api/products/${reviewProduct.id}/comments`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ rating: reviewRating, comment: reviewContent })
             });
@@ -157,7 +162,7 @@ function OrderHistory() {
                     <p>Bạn chưa có đơn hàng nào.</p>
                 </div>
             ) : (
-                orders.map(order => {
+                orders.filter(order => order.orderDetails && order.orderDetails.length > 0).map(order => {
                     const orderStatus = order.orderDetails?.[0]?.status ?? order.status ?? 0;
                     const statusInfo = STATUS_MAP[orderStatus] || { label: 'Không rõ', color: '#888' };
                     const isDelivered = orderStatus === 3;
@@ -179,7 +184,7 @@ function OrderHistory() {
                                 {order.orderDetails && order.orderDetails.map((item, index) => (
                                     <div
                                         key={index}
-                                        onClick={() => navigate(`/product-detail?id=${item.product?.id || item.productId}`)}
+                                        onClick={() => navigate(`/product/${item.product?.id || item.productId}`)}
                                         style={{
                                             display: 'flex', justifyContent: 'space-between', padding: '12px',
                                             borderBottom: '1px dashed #eee', cursor: 'pointer', transition: '0.2s'
@@ -205,9 +210,9 @@ function OrderHistory() {
                                             {isDelivered && (
                                                 <div style={{ marginTop: '8px' }}>
                                                     <button
-                                                        onClick={e => { 
-                                                            e.stopPropagation(); 
-                                                            openReviewModal(item.product || { id: item.productId, name: `Sản phẩm #${item.productId}` }); 
+                                                        onClick={e => {
+                                                            e.stopPropagation();
+                                                            openReviewModal(item.product || { id: item.productId, name: `Sản phẩm #${item.productId}` });
                                                         }}
                                                         style={{
                                                             padding: '5px 12px', background: 'transparent',
@@ -249,7 +254,7 @@ function OrderHistory() {
                                                     background: '#f0f0f0', color: '#888',
                                                     borderRadius: '20px', fontSize: '0.8rem'
                                                 }}>
-                                                    ✓ Đã gửi báo cáo
+                                                    ✓ Đã yêu cầu Trả hàng/Hoàn tiền
                                                 </span>
                                             ) : (
                                                 <button
@@ -263,7 +268,7 @@ function OrderHistory() {
                                                     onMouseEnter={e => { e.target.style.background = '#ee4d2d'; e.target.style.color = '#fff'; }}
                                                     onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = '#ee4d2d'; }}
                                                 >
-                                                    Báo cáo sản phẩm
+                                                    Yêu cầu Trả hàng/Hoàn tiền
                                                 </button>
                                             )}
                                         </div>
@@ -271,9 +276,14 @@ function OrderHistory() {
                                 </div>
 
                                 <div style={{ textAlign: 'right' }}>
+                                    {order.shippingFee != null && order.shippingFee > 0 && (
+                                        <div style={{ color: '#888', fontSize: '0.9rem', marginBottom: '5px' }}>
+                                            Phí vận chuyển: +{formatVND(order.shippingFee)}
+                                        </div>
+                                    )}
                                     <div style={{ color: '#888', fontSize: '0.9rem' }}>Tổng thanh toán:</div>
                                     <div style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#ee4d2d' }}>
-                                        {formatVND(order.orderDetails?.reduce((sum, i) => sum + i.totalMoney, 0) || 0)}
+                                        {formatVND((order.orderDetails?.reduce((sum, i) => sum + i.totalMoney, 0) || 0) + (order.shippingFee || 0))}
                                     </div>
                                 </div>
                             </div>
@@ -306,7 +316,7 @@ function OrderHistory() {
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                         }}>
                             <div>
-                                <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Báo cáo sản phẩm</div>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Yêu cầu Trả hàng/Hoàn tiền</div>
                                 <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '2px' }}>Đơn hàng #{reportModal}</div>
                             </div>
                             <button
@@ -327,7 +337,7 @@ function OrderHistory() {
 
                             {/* Lý do */}
                             <div style={{ marginBottom: '16px' }}>
-                                <div style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>Lý do báo cáo *</div>
+                                <div style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>Lý do Trả hàng/Hoàn tiền *</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {REPORT_REASONS.map(r => (
                                         <label
@@ -372,6 +382,22 @@ function OrderHistory() {
                                 />
                             </div>
 
+                            {/* Bằng chứng */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <div style={{ fontWeight: '600', marginBottom: '8px', color: '#333' }}>Hình ảnh bằng chứng (tùy chọn)</div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => setReportForm(prev => ({ ...prev, evidence: e.target.files[0] }))}
+                                    style={{
+                                        width: '100%', padding: '10px 12px', borderRadius: '8px',
+                                        border: '1.5px solid #ddd', fontSize: '0.9rem',
+                                        boxSizing: 'border-box', fontFamily: 'inherit',
+                                        cursor: 'pointer'
+                                    }}
+                                />
+                            </div>
+
                             {/* Actions */}
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <button
@@ -396,7 +422,7 @@ function OrderHistory() {
                                         fontWeight: '700', fontSize: '0.95rem', transition: 'all 0.2s'
                                     }}
                                 >
-                                    {submitting ? 'Đang gửi...' : '🚩 Gửi báo cáo'}
+                                    {submitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
                                 </button>
                             </div>
                         </div>

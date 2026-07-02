@@ -44,7 +44,7 @@ public class OrderController {
             List<Integer> selectedProductIds = (List<Integer>) payload.get("selectedProductIds");
 
             // 2. Gọi Service tạo đơn (Chỉ lưu những gì DB ông có)
-            Order order = orderService.placeOrder(userId, method, selectedProductIds);
+            Order order = orderService.placeOrder(userId, method, selectedProductIds, payload);
 
             // 3. Xử lý phản hồi
             if ("bank_transfer".equalsIgnoreCase(method)) {

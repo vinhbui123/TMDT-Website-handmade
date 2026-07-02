@@ -33,6 +33,12 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "shipping_fee")
+    private Integer shippingFee;
+
+    @Column(name = "ghn_order_code")
+    private String ghnOrderCode;
+
     // --- PHẦN THÊM MỚI ĐỂ LẤY CHI TIẾT ĐƠN HÀNG ---
     @OneToMany(fetch = FetchType.EAGER) // EAGER để tự động lấy chi tiết sản phẩm khi gọi Order
     @JoinColumn(name = "order_id") // Khớp với cột order_id trong bảng order_details

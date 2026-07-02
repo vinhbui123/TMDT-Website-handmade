@@ -14,6 +14,9 @@ import OrderHistory from './pages/OrderHistory'
 import ProductDetail from './pages/ProductDetail'
 import ShopPage from './pages/ShopPage'
 import ShopDashboard from "./pages/ShopDashboard.jsx";
+import RegisterShop from './pages/RegisterShop.jsx';
+import AdminApproveShops from './pages/AdminApproveShops.jsx';
+import ShopSearchList from './pages/ShopSearchList'
 
 // --- Các trang của Vinh (Incoming) ---
 import Login from './components/Login'
@@ -213,8 +216,11 @@ function App() {
               } />
 
               <Route path="/products" element={<ProductCategoryList />} />
+              <Route path="/shops" element={<ShopSearchList />} />
               <Route path="/shop/:id" element={<ShopPage />} />
               <Route path="/ShopDashBoard" element={<ShopDashboard />} />
+              <Route path="/register-shop" element={<RegisterShop />} />
+              <Route path="/admin-shops" element={<AdminApproveShops />} />
             </Routes>
           </main>
 

@@ -4,7 +4,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.nio.file.Paths;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -38,9 +41,22 @@ public class WebConfig implements WebMvcConfigurer {
         // Thư mục chứa ảnh mới upload của Backend
         String backendUploadsPath = Paths.get("src/main/resources/static/images/").toAbsolutePath().toUri().toString();
 
+        String reportsPath = Paths.get("uploads/images/reports/").toAbsolutePath().toUri().toString();
+
+        // Thư mục chứa ảnh CCCD của người đăng ký bán hàng
+        String documentsPath = Paths.get("uploads/images/documents/").toAbsolutePath().toUri().toString();
+
         // Khi Frontend (React) gọi link ảnh dạng /images/logos/ten_file.png,
         registry.addResourceHandler("/images/logos/**")
                 .addResourceLocations(logosPath);
+
+        // Ảnh bằng chứng báo cáo
+        registry.addResourceHandler("/images/reports/**")
+                .addResourceLocations(reportsPath);
+
+        // Ảnh CCCD (mặt trước / mặt sau) của người đăng ký bán hàng
+        registry.addResourceHandler("/images/documents/**")
+                .addResourceLocations(documentsPath);
 
         // Phục vụ tất cả ảnh khác từ cả thư mục frontend và backend
         registry.addResourceHandler("/images/**")

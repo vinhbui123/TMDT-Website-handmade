@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173") // Vite default port
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true") // Vite default port
 public class AuthController {
     
     private final AuthService authService;
@@ -45,6 +45,7 @@ public class AuthController {
         if (response.isSuccess() && response.getUser() != null) {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
+            session.setAttribute("role", response.getUser().getRole());
             sessionManager.addSession(response.getUser().getId(), session);
             cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
@@ -67,6 +68,7 @@ public class AuthController {
         if (response.isSuccess() && response.getUser() != null) {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
+            session.setAttribute("role", response.getUser().getRole());
             sessionManager.addSession(response.getUser().getId(), session);
             cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);
@@ -80,6 +82,7 @@ public class AuthController {
         if (response.isSuccess() && response.getUser() != null) {
             HttpSession session = httpRequest.getSession(true);
             session.setAttribute("userId", response.getUser().getId());
+            session.setAttribute("role", response.getUser().getRole());
             sessionManager.addSession(response.getUser().getId(), session);
             cartService.mergeSessionCartToDb(response.getUser().getId());
             return ResponseEntity.ok(response);

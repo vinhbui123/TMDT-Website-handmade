@@ -52,7 +52,23 @@ public class Shop {
     @Formula("(SELECT COALESCE(AVG(c.rating), 0) FROM comments c JOIN products p ON c.product_id = p.id WHERE p.shop_id = id)")
     private Double rating;
 
-    private Integer status = 1;
+    @Column(name = "owner_name")
+    private String ownerName;
+
+    @Column(name = "identity_card_number")
+    private String identityCardNumber;
+
+    @Column(name = "identity_card_front")
+    private String identityCardFront;
+
+    @Column(name = "identity_card_back")
+    private String identityCardBack;
+
+    @Column(name = "tax_code")
+    private String taxCode;
+
+    // 0 = Pending, 1 = Approved, 2 = Rejected
+    private Integer status = 0;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)

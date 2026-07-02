@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '../assets/css/ShopDashboard.css';
 
 export default function ShopDashboard() {
@@ -8,7 +9,19 @@ export default function ShopDashboard() {
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
     const [customRequests, setCustomRequests] = useState([]);
+    const [refunds, setRefunds] = useState([]);
+    const [coupons, setCoupons] = useState([]);
+    const [revenueData, setRevenueData] = useState(null);
     const [profile, setProfile] = useState({ shopName: '', description: '', phoneNumber: '', shopAddress: '' });
+
+    // STATES Mã giảm giá
+    const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+    const [editingCoupon, setEditingCoupon] = useState(null);
+    const [couponForm, setCouponForm] = useState({
+        code: '', discountType: 'FIXED', discountValue: 0,
+        minOrderAmount: 0, maxDiscount: 0, quantity: 100,
+        startDate: '', endDate: '', active: true
+    });
     const [loading, setLoading] = useState(true);
 
     const [allColors, setAllColors] = useState([]);
@@ -59,13 +72,19 @@ export default function ShopDashboard() {
             fetch('/api/shop/products', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
             fetch('/api/shop/orders', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
             fetch('/api/shop/custom-requests', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
+            fetch('/api/shop/reports', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
+            fetch('/api/shop/coupons', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
+            fetch('/api/shop/revenue', { credentials: 'include' }).then(res => res.ok ? res.json() : null),
             fetch('/api/colors').then(res => res.ok ? res.json() : []),
             fetch('/api/materials').then(res => res.ok ? res.json() : [])
-        ]).then(([profileData, prods, ords, reqs, colors, materials]) => {
+        ]).then(([profileData, prods, ords, reqs, refs, cpns, revData, colors, materials]) => {
             if (profileData.shopName) setProfile(profileData);
             if (Array.isArray(prods)) setProducts(prods);
             if (Array.isArray(ords)) setOrders(ords);
             if (Array.isArray(reqs)) setCustomRequests(reqs);
+            if (Array.isArray(refs)) setRefunds(refs);
+            if (Array.isArray(cpns)) setCoupons(cpns);
+            if (revData) setRevenueData(revData);
             if (Array.isArray(colors)) setAllColors(colors);
             if (Array.isArray(materials)) setAllMaterials(materials);
         }).finally(() => setLoading(false));
@@ -187,6 +206,18 @@ export default function ShopDashboard() {
         } catch (err) { console.error(err); }
     };
 
+    const updateRefundStatus = async (id, status) => {
+        try {
+            const res = await fetch(`/api/shop/reports/${id}/status?status=${status}`, { method: 'PUT', credentials: 'include' });
+            if (res.ok) {
+                setRefunds(refunds.map(r => r.id === id ? { ...r, status } : r));
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Lỗi cập nhật trạng thái hoàn tiền');
+            }
+        } catch (err) { console.error(err); }
+    };
+
     // --- LOGIC HỒ SƠ ---
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -302,13 +333,13 @@ export default function ShopDashboard() {
                         <p>Quản lý không gian sáng tạo của bạn</p>
                     </div>
                     <nav className="shop-tab-nav">
-                        {['products', 'orders', 'custom_requests', 'profile'].map(tab => (
+                        {['products', 'orders', 'custom_requests', 'refunds', 'coupons', 'revenue', 'profile'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`shop-tab-btn ${activeTab === tab ? 'active' : ''}`}
                             >
-                                {tab === 'products' ? 'Sản phẩm' : tab === 'orders' ? 'Đơn hàng' : tab === 'custom_requests' ? 'Yêu cầu Custom' : 'Hồ sơ'}
+                                {tab === 'products' ? 'Sản phẩm' : tab === 'orders' ? 'Đơn hàng' : tab === 'custom_requests' ? 'Yêu cầu Custom' : tab === 'refunds' ? 'Trả hàng / Hoàn tiền' : tab === 'coupons' ? 'Mã giảm giá' : tab === 'revenue' ? 'Báo cáo doanh thu' : 'Hồ sơ'}
                             </button>
                         ))}
                     </nav>
@@ -393,7 +424,7 @@ export default function ShopDashboard() {
                                             ))}
                                             {products.length === 0 && (
                                                 <tr>
-                                                    <td colSpan="4" className="shop-table-empty">Chưa có sản phẩm nào. Hãy thêm mới nhé! 🎨</td>
+                                                    <td colSpan="4" className="shop-table-empty">Chưa có sản phẩm nào. Hãy thêm mới nhé!</td>
                                                 </tr>
                                             )}
                                         </tbody>
@@ -442,7 +473,7 @@ export default function ShopDashboard() {
                                             </div>
                                         </div>
                                     ))}
-                                    {orders.length === 0 && <div className="shop-empty">Chưa có đơn hàng nào 📦</div>}
+                                    {orders.length === 0 && <div className="shop-empty">Chưa có đơn hàng nào</div>}
                                 </div>
                             </div>
                         )}
@@ -473,7 +504,191 @@ export default function ShopDashboard() {
                                             </div>
                                         </div>
                                     ))}
-                                    {customRequests.length === 0 && <div className="shop-empty">Chưa có yêu cầu custom nào ✨</div>}
+                                    {customRequests.length === 0 && <div className="shop-empty">Chưa có yêu cầu custom nào</div>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- TAB TRẢ HÀNG --- */}
+                        {activeTab === 'refunds' && (
+                            <div className="shop-animate-in">
+                                <div className="shop-section-header">
+                                    <h2>Quản lý Yêu cầu Trả hàng / Hoàn tiền</h2>
+                                </div>
+                                <div className="order-list">
+                                    {refunds.map(r => (
+                                        <div key={r.id} className="order-card">
+                                            <div className="order-info">
+                                                <h3>Yêu cầu hoàn tiền Đơn hàng #{r.orderId}</h3>
+                                                <p><strong>Lý do:</strong> {
+                                                    r.reason === 'NOT_RECEIVED' ? 'Không nhận được hàng' :
+                                                    r.reason === 'DAMAGED' ? 'Hàng bị hư hỏng / vỡ' :
+                                                    r.reason === 'WRONG_ITEM' ? 'Hàng không đúng mô tả' :
+                                                    r.reason === 'WRONG_COLOR' ? 'Hàng sai màu / mẫu' :
+                                                    r.reason === 'MISSING_ITEM' ? 'Thiếu hàng / phụ kiện' : 'Lý do khác'
+                                                }</p>
+                                                <p><strong>Mô tả chi tiết:</strong> {r.description || 'Không có'}</p>
+                                                {r.evidenceUrl && (
+                                                    <div style={{ marginTop: '10px' }}>
+                                                        <a href={`http://localhost:8080${r.evidenceUrl}`} target="_blank" rel="noreferrer">
+                                                            <img src={`http://localhost:8080${r.evidenceUrl}`} alt="Bằng chứng" style={{ maxWidth: '120px', borderRadius: '8px', border: '1px solid #ddd', cursor: 'pointer' }} />
+                                                        </a>
+                                                        <p style={{ fontSize: '12px', color: '#888' }}>(Bấm vào ảnh để xem lớn)</p>
+                                                    </div>
+                                                )}
+                                                <p style={{ fontSize: '12px', color: '#888', marginTop: '10px' }}>Ngày tạo: {new Date(r.createdAt).toLocaleString('vi-VN')}</p>
+                                            </div>
+                                            <div className="order-actions" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
+                                                {r.status === 0 && <span className="status-badge status-pending">Chờ xử lý</span>}
+                                                {r.status === 1 && <span className="status-badge status-approved">Đã chấp nhận hoàn tiền</span>}
+                                                {r.status === 2 && <span className="status-badge status-cancelled">Đã từ chối</span>}
+                                                
+                                                {r.status === 0 && (
+                                                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                                        <button className="btn-approve" onClick={() => updateRefundStatus(r.id, 1)}>Chấp nhận</button>
+                                                        <button className="btn-cancel" onClick={() => updateRefundStatus(r.id, 2)}>Từ chối</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {refunds.length === 0 && <div className="shop-empty">Chưa có yêu cầu hoàn tiền nào</div>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- TAB MÃ GIẢM GIÁ --- */}
+                        {activeTab === 'coupons' && (
+                            <div className="shop-animate-in">
+                                <div className="shop-section-header">
+                                    <h2>Quản lý Mã Giảm Giá</h2>
+                                    <button className="btn-primary" onClick={() => {
+                                        setEditingCoupon(null);
+                                        setCouponForm({ code: '', discountType: 'FIXED', discountValue: 0, minOrderAmount: 0, maxDiscount: 0, quantity: 100, startDate: '', endDate: '', active: true });
+                                        setIsCouponModalOpen(true);
+                                    }}>+ Tạo mã mới</button>
+                                </div>
+                                <div className="shop-table-card">
+                                    <table className="shop-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã</th>
+                                                <th>Loại giảm</th>
+                                                <th>Giá trị</th>
+                                                <th>Đơn tối thiểu</th>
+                                                <th>Đã dùng / Tổng</th>
+                                                <th>Hạn sử dụng</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {coupons.map(c => (
+                                                <tr key={c.id}>
+                                                    <td><strong style={{color:'#ee4d2d',letterSpacing:'1px'}}>{c.code}</strong></td>
+                                                    <td>{c.discountType === 'PERCENT' ? 'Giảm %' : 'Giảm cố định'}</td>
+                                                    <td>{c.discountType === 'PERCENT' ? `${c.discountValue}%` : `${c.discountValue.toLocaleString('vi-VN')}đ`}
+                                                        {c.discountType === 'PERCENT' && c.maxDiscount > 0 && <div style={{fontSize:'11px',color:'#888'}}>Tối đa {c.maxDiscount.toLocaleString('vi-VN')}đ</div>}
+                                                    </td>
+                                                    <td>{c.minOrderAmount > 0 ? `${c.minOrderAmount.toLocaleString('vi-VN')}đ` : 'Không'}</td>
+                                                    <td>{c.usedCount} / {c.quantity}</td>
+                                                    <td style={{fontSize:'12px'}}>
+                                                        {c.startDate ? new Date(c.startDate).toLocaleDateString('vi-VN') : '—'}
+                                                        <br/>→ {c.endDate ? new Date(c.endDate).toLocaleDateString('vi-VN') : '—'}
+                                                    </td>
+                                                    <td>
+                                                        <span className={`status-badge ${c.active ? 'status-approved' : 'status-cancelled'}`}>
+                                                            {c.active ? 'Đang hoạt động' : 'Đã tắt'}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <button className="btn-edit" onClick={() => {
+                                                            setEditingCoupon(c);
+                                                            setCouponForm({
+                                                                code: c.code, discountType: c.discountType, discountValue: c.discountValue,
+                                                                minOrderAmount: c.minOrderAmount, maxDiscount: c.maxDiscount, quantity: c.quantity,
+                                                                startDate: c.startDate ? c.startDate.substring(0, 16) : '',
+                                                                endDate: c.endDate ? c.endDate.substring(0, 16) : '',
+                                                                active: c.active
+                                                            });
+                                                            setIsCouponModalOpen(true);
+                                                        }}>Sửa</button>
+                                                        <button className="btn-danger" style={{marginLeft:'5px'}} onClick={async () => {
+                                                            if (!confirm('Bạn muốn xóa mã ' + c.code + '?')) return;
+                                                            const res = await fetch(`/api/shop/coupons/${c.id}`, { method: 'DELETE', credentials: 'include' });
+                                                            if (res.ok) setCoupons(coupons.filter(x => x.id !== c.id));
+                                                        }}>Xóa</button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {coupons.length === 0 && (
+                                                <tr><td colSpan="8" className="shop-table-empty">Chưa có mã giảm giá nào. Hãy tạo mới!</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                        {/* --- TAB BÁO CÁO DOANH THU --- */}
+                        {activeTab === 'revenue' && revenueData && (
+                            <div className="shop-animate-in">
+                                <div className="shop-section-header">
+                                    <h2>Báo cáo doanh thu (Đơn đã giao)</h2>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '30px' }}>
+                                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', borderTop: '4px solid #52c41a' }}>
+                                        <h3 style={{ color: '#666', fontSize: '16px', marginBottom: '10px' }}>Tổng Doanh Thu</h3>
+                                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#52c41a' }}>{revenueData.totalRevenue.toLocaleString('vi-VN')}đ</div>
+                                    </div>
+                                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', borderTop: '4px solid #1890ff' }}>
+                                        <h3 style={{ color: '#666', fontSize: '16px', marginBottom: '10px' }}>Tổng Đơn Hàng</h3>
+                                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#1890ff' }}>{revenueData.totalOrders}</div>
+                                    </div>
+                                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', textAlign: 'center', borderTop: '4px solid #faad14' }}>
+                                        <h3 style={{ color: '#666', fontSize: '16px', marginBottom: '10px' }}>Sản Phẩm Đã Bán</h3>
+                                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#faad14' }}>{revenueData.totalProductsSold}</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+                                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                                        <h3 style={{ marginBottom: '20px', color: '#333' }}>Biểu đồ doanh thu theo tháng</h3>
+                                        {revenueData.revenueByMonth.length > 0 ? (
+                                            <div style={{ width: '100%', height: '300px' }}>
+                                                <ResponsiveContainer>
+                                                    <BarChart data={revenueData.revenueByMonth}>
+                                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                        <XAxis dataKey="name" />
+                                                        <YAxis tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`} />
+                                                        <Tooltip formatter={(val) => `${val.toLocaleString('vi-VN')}đ`} />
+                                                        <Bar dataKey="revenue" fill="#ee4d2d" radius={[4, 4, 0, 0]} />
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        ) : (
+                                            <div style={{ textAlign: 'center', color: '#888', paddingTop: '50px' }}>Chưa có dữ liệu doanh thu</div>
+                                        )}
+                                    </div>
+
+                                    <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+                                        <h3 style={{ marginBottom: '20px', color: '#333' }}>Top Sản phẩm bán chạy</h3>
+                                        {revenueData.topProducts.length > 0 ? (
+                                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                                {revenueData.topProducts.map((p, idx) => (
+                                                    <li key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                                                        <div style={{ width: '24px', fontWeight: 'bold', color: '#ee4d2d' }}>#{idx + 1}</div>
+                                                        <img src={p.img || 'https://placehold.co/40x40'} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', margin: '0 10px' }} alt="" />
+                                                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                            <div style={{ fontSize: '13px', fontWeight: '500', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{p.name}</div>
+                                                            <div style={{ fontSize: '12px', color: '#666' }}>Đã bán: <strong style={{color:'#333'}}>{p.quantity}</strong></div>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <div style={{ textAlign: 'center', color: '#888', paddingTop: '50px' }}>Chưa có dữ liệu</div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -803,6 +1018,115 @@ export default function ShopDashboard() {
                                 {savingCustomize ? 'Đang lưu...' : 'Lưu cấu hình'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL TẠO/SỬA MÃ GIẢM GIÁ */}
+            {isCouponModalOpen && (
+                <div className="shop-modal-overlay">
+                    <div className="shop-modal" style={{maxWidth: '550px'}}>
+                        <div className="shop-modal-header">
+                            <h3>{editingCoupon ? 'Sửa mã giảm giá' : 'Tạo mã giảm giá mới'}</h3>
+                            <button className="shop-modal-close" onClick={() => setIsCouponModalOpen(false)}>&times;</button>
+                        </div>
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const method = editingCoupon ? 'PUT' : 'POST';
+                            const url = editingCoupon ? `/api/shop/coupons/${editingCoupon.id}` : '/api/shop/coupons';
+                            const payload = {
+                                ...couponForm,
+                                startDate: couponForm.startDate || null,
+                                endDate: couponForm.endDate || null
+                            };
+                            try {
+                                const res = await fetch(url, {
+                                    method, credentials: 'include',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(payload)
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    alert(data.message);
+                                    setIsCouponModalOpen(false);
+                                    // Refresh coupons
+                                    const refreshRes = await fetch('/api/shop/coupons', { credentials: 'include' });
+                                    if (refreshRes.ok) {
+                                        const refreshed = await refreshRes.json();
+                                        if (Array.isArray(refreshed)) setCoupons(refreshed);
+                                    }
+                                } else {
+                                    alert(data.message || 'Lỗi');
+                                }
+                            } catch (err) { alert('Lỗi hệ thống'); }
+                        }} className="shop-modal-body">
+                            <div className="shop-form-group">
+                                <label>Mã giảm giá (VD: SUMMER50K)</label>
+                                <input type="text" value={couponForm.code}
+                                    onChange={e => setCouponForm({...couponForm, code: e.target.value.toUpperCase()})}
+                                    required disabled={!!editingCoupon}
+                                    style={{letterSpacing:'2px', fontWeight:'bold'}} />
+                            </div>
+                            <div className="shop-modal-row">
+                                <div className="shop-form-group">
+                                    <label>Loại giảm giá</label>
+                                    <select value={couponForm.discountType}
+                                        onChange={e => setCouponForm({...couponForm, discountType: e.target.value})}>
+                                        <option value="FIXED">Giảm cố định (VNĐ)</option>
+                                        <option value="PERCENT">Giảm theo %</option>
+                                    </select>
+                                </div>
+                                <div className="shop-form-group">
+                                    <label>Giá trị giảm {couponForm.discountType === 'PERCENT' ? '(%)' : '(VNĐ)'}</label>
+                                    <input type="number" value={couponForm.discountValue}
+                                        onChange={e => setCouponForm({...couponForm, discountValue: Number(e.target.value) || 0})} required />
+                                </div>
+                            </div>
+                            <div className="shop-modal-row">
+                                <div className="shop-form-group">
+                                    <label>Đơn hàng tối thiểu (VNĐ)</label>
+                                    <input type="number" value={couponForm.minOrderAmount}
+                                        onChange={e => setCouponForm({...couponForm, minOrderAmount: Number(e.target.value) || 0})} />
+                                </div>
+                                {couponForm.discountType === 'PERCENT' && (
+                                    <div className="shop-form-group">
+                                        <label>Giảm tối đa (VNĐ)</label>
+                                        <input type="number" value={couponForm.maxDiscount}
+                                            onChange={e => setCouponForm({...couponForm, maxDiscount: Number(e.target.value) || 0})} />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="shop-form-group">
+                                <label>Tổng số lượt sử dụng</label>
+                                <input type="number" value={couponForm.quantity}
+                                    onChange={e => setCouponForm({...couponForm, quantity: Number(e.target.value) || 0})} required />
+                            </div>
+                            <div className="shop-modal-row">
+                                <div className="shop-form-group">
+                                    <label>Ngày bắt đầu</label>
+                                    <input type="datetime-local" value={couponForm.startDate}
+                                        onChange={e => setCouponForm({...couponForm, startDate: e.target.value})} />
+                                </div>
+                                <div className="shop-form-group">
+                                    <label>Ngày hết hạn</label>
+                                    <input type="datetime-local" value={couponForm.endDate}
+                                        onChange={e => setCouponForm({...couponForm, endDate: e.target.value})} />
+                                </div>
+                            </div>
+                            {editingCoupon && (
+                                <div className="shop-form-group">
+                                    <label style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                                        <input type="checkbox" checked={couponForm.active}
+                                            onChange={e => setCouponForm({...couponForm, active: e.target.checked})} />
+                                        Đang hoạt động
+                                    </label>
+                                </div>
+                            )}
+                            <div className="shop-modal-actions">
+                                <button type="button" className="btn-modal-cancel" onClick={() => setIsCouponModalOpen(false)}>Hủy</button>
+                                <button type="submit" className="btn-modal-save">{editingCoupon ? 'Cập nhật' : 'Tạo mã'}</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -10,16 +10,12 @@ class CheckoutService {
 
             // 2. Chuẩn bị dữ liệu gửi đi
             const payload = {
+                ...orderData, // Include shippingFee, couponCode, customerAddress, etc.
                 userId: parseInt(user.id),
-                paymentMethod: orderData.paymentMethod,
-                selectedProductIds: selectedProductIds,
-
-                // QUAN TRỌNG: Gửi totalAmount để Backend dùng cho VNPay
-                // Vì bảng orders của ông không lưu cột này nên phải lấy từ Frontend
-                totalAmount: orderData.totalAmount
+                selectedProductIds: selectedProductIds
             };
 
-            console.log("🚀 Payload gửi lên Backend:", payload);
+            console.log(" Payload gửi lên Backend:", payload);
 
             const response = await fetch(`${this.apiBaseUrl}/place`, {
                 method: 'POST',
@@ -39,7 +35,7 @@ class CheckoutService {
             return result;
 
         } catch (error) {
-            console.error('🔴 Lỗi tại CheckoutService:', error.message);
+            console.error(' Lỗi tại CheckoutService:', error.message);
             throw error;
         }
     }
