@@ -1079,27 +1079,27 @@ export default function ShopDashboard() {
                                 <div className="shop-form-group">
                                     <label>Giá trị giảm {couponForm.discountType === 'PERCENT' ? '(%)' : '(VNĐ)'}</label>
                                     <input type="number" value={couponForm.discountValue}
-                                        onChange={e => setCouponForm({...couponForm, discountValue: Number(e.target.value)})} required />
+                                        onChange={e => setCouponForm({...couponForm, discountValue: Number(e.target.value) || 0})} required />
                                 </div>
                             </div>
                             <div className="shop-modal-row">
                                 <div className="shop-form-group">
                                     <label>Đơn hàng tối thiểu (VNĐ)</label>
                                     <input type="number" value={couponForm.minOrderAmount}
-                                        onChange={e => setCouponForm({...couponForm, minOrderAmount: Number(e.target.value)})} />
+                                        onChange={e => setCouponForm({...couponForm, minOrderAmount: Number(e.target.value) || 0})} />
                                 </div>
                                 {couponForm.discountType === 'PERCENT' && (
                                     <div className="shop-form-group">
                                         <label>Giảm tối đa (VNĐ)</label>
                                         <input type="number" value={couponForm.maxDiscount}
-                                            onChange={e => setCouponForm({...couponForm, maxDiscount: Number(e.target.value)})} />
+                                            onChange={e => setCouponForm({...couponForm, maxDiscount: Number(e.target.value) || 0})} />
                                     </div>
                                 )}
                             </div>
                             <div className="shop-form-group">
                                 <label>Tổng số lượt sử dụng</label>
                                 <input type="number" value={couponForm.quantity}
-                                    onChange={e => setCouponForm({...couponForm, quantity: Number(e.target.value)})} required />
+                                    onChange={e => setCouponForm({...couponForm, quantity: Number(e.target.value) || 0})} required />
                             </div>
                             <div className="shop-modal-row">
                                 <div className="shop-form-group">

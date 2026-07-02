@@ -1,20 +1,27 @@
 package com.project.web_hand_made_TMDT.controller;
 
-import com.project.web_hand_made_TMDT.model.CartItem;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.web_hand_made_TMDT.model.Coupon;
 import com.project.web_hand_made_TMDT.model.Product;
 import com.project.web_hand_made_TMDT.repository.CouponRepository;
 import com.project.web_hand_made_TMDT.repository.ProductRepository;
 import com.project.web_hand_made_TMDT.service.CartService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/coupons")
@@ -71,7 +78,9 @@ public class CouponController {
         }
 
         // 4. Kiểm tra số lượt sử dụng
-        if (coupon.getUsedCount() >= coupon.getQuantity()) {
+        int usedCount = (coupon.getUsedCount() != null) ? coupon.getUsedCount() : 0;
+        int quantity  = (coupon.getQuantity()  != null) ? coupon.getQuantity()  : 100;
+        if (usedCount >= quantity) {
             return ResponseEntity.ok(Map.of("success", false, "message", "Mã giảm giá đã hết lượt sử dụng"));
         }
 
@@ -80,7 +89,7 @@ public class CouponController {
         for (Integer productId : selectedProductIds) {
             Optional<Product> productOpt = productRepository.findById(productId);
             if (productOpt.isPresent() && productOpt.get().getShop() != null
-                    && productOpt.get().getShop().getId() == coupon.getShopId()) {
+                    && java.util.Objects.equals(productOpt.get().getShop().getId(), coupon.getShopId())) {
                 belongsToShop = true;
                 break;
             }
@@ -90,9 +99,10 @@ public class CouponController {
         }
 
         // 6. Kiểm tra đơn hàng tối thiểu
-        if (totalAmount < coupon.getMinOrderAmount()) {
+        int minOrder = (coupon.getMinOrderAmount() != null) ? coupon.getMinOrderAmount() : 0;
+        if (totalAmount < minOrder) {
             return ResponseEntity.ok(Map.of("success", false, "message",
-                    "Đơn hàng tối thiểu " + String.format("%,d", coupon.getMinOrderAmount()) + "đ để áp dụng mã này"));
+                    "Đơn hàng tối thiểu " + String.format("%,d", minOrder) + "đ để áp dụng mã này"));
         }
 
         // 7. Tính số tiền giảm

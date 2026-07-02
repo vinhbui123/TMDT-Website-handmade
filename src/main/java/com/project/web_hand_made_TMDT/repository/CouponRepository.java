@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface CouponRepository extends JpaRepository<Coupon, Integer> {
     Optional<Coupon> findByCode(String code);
-    List<Coupon> findByShopIdOrderByCreatedAtDesc(int shopId);
+    List<Coupon> findByShopIdOrderByCreatedAtDesc(Integer shopId);
     boolean existsByCode(String code);
+    boolean existsByCodeAndShopId(String code, Integer shopId);
 }

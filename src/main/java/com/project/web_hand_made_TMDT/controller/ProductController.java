@@ -100,8 +100,8 @@ public class ProductController {
             @RequestBody Map<String, Object> payload,
             HttpSession session) {
 
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập"));
         }
 
@@ -109,7 +109,7 @@ public class ProductController {
             int rating = Integer.parseInt(payload.get("rating").toString());
             String comment = (String) payload.get("comment");
 
-            productService.addComment(id, user.getId(), rating, comment);
+            productService.addComment(id, userId, rating, comment);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import '../assets/css/review-modal.css';
 
 const STATUS_MAP = {
-    0: { label: '🕒 Chờ xác nhận', color: '#ff9f43' },
-    1: { label: '✅ Đã duyệt', color: '#1dd1a1' },
-    2: { label: '🚚 Đang giao', color: '#54a0ff' },
+    0: { label: 'Chờ xác nhận', color: '#ff9f43' },
+    1: { label: 'Đã duyệt', color: '#1dd1a1' },
+    2: { label: 'Đang giao', color: '#54a0ff' },
     3: { label: 'Hoàn thành', color: '#2ecc71' },
-    4: { label: '❌ Đã hủy', color: '#ee5a24' },
+    4: { label: 'Đã hủy', color: '#ee5a24' },
 };
 
 const REPORT_REASONS = [
@@ -131,6 +131,7 @@ function OrderHistory() {
         try {
             const res = await fetch(`/api/products/${reviewProduct.id}/comments`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ rating: reviewRating, comment: reviewContent })
             });
@@ -421,7 +422,7 @@ function OrderHistory() {
                                         fontWeight: '700', fontSize: '0.95rem', transition: 'all 0.2s'
                                     }}
                                 >
-                                    {submitting ? 'Đang gửi...' : '🚩 Gửi yêu cầu'}
+                                    {submitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
                                 </button>
                             </div>
                         </div>

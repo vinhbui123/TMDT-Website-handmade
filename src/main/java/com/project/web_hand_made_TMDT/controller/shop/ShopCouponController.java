@@ -66,13 +66,16 @@ public class ShopCouponController {
         String code = coupon.getCode().trim().toUpperCase();
         coupon.setCode(code);
 
-        // Kiểm tra mã đã tồn tại chưa
-        if (couponRepository.existsByCode(code)) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Mã giảm giá đã tồn tại"));
+        // Kiểm tra mã đã tồn tại trong cùng shop chưa
+        if (couponRepository.existsByCodeAndShopId(code, shopOpt.get().getId())) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Shop của bạn đã có mã giảm giá này rồi"));
         }
 
         coupon.setShopId(shopOpt.get().getId());
         coupon.setUsedCount(0);
+        coupon.setMinOrderAmount(coupon.getMinOrderAmount() != null ? coupon.getMinOrderAmount() : 0);
+        coupon.setMaxDiscount(coupon.getMaxDiscount() != null ? coupon.getMaxDiscount() : 0);
+        coupon.setQuantity(coupon.getQuantity() != null ? coupon.getQuantity() : 100);
         couponRepository.save(coupon);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Tạo mã giảm giá thành công"));
@@ -101,15 +104,15 @@ public class ShopCouponController {
         Coupon coupon = couponOpt.get();
 
         // Verify ownership
-        if (coupon.getShopId() != shopOpt.get().getId()) {
+        if (!java.util.Objects.equals(coupon.getShopId(), shopOpt.get().getId())) {
             return ResponseEntity.status(403).body(Map.of("success", false, "message", "Không có quyền chỉnh sửa"));
         }
 
         coupon.setDiscountType(updated.getDiscountType());
         coupon.setDiscountValue(updated.getDiscountValue());
-        coupon.setMinOrderAmount(updated.getMinOrderAmount());
-        coupon.setMaxDiscount(updated.getMaxDiscount());
-        coupon.setQuantity(updated.getQuantity());
+        coupon.setMinOrderAmount(updated.getMinOrderAmount() != null ? updated.getMinOrderAmount() : 0);
+        coupon.setMaxDiscount(updated.getMaxDiscount() != null ? updated.getMaxDiscount() : 0);
+        coupon.setQuantity(updated.getQuantity() != null ? updated.getQuantity() : coupon.getQuantity());
         coupon.setStartDate(updated.getStartDate());
         coupon.setEndDate(updated.getEndDate());
         coupon.setActive(updated.isActive());
@@ -138,7 +141,7 @@ public class ShopCouponController {
             return ResponseEntity.notFound().build();
         }
 
-        if (couponOpt.get().getShopId() != shopOpt.get().getId()) {
+        if (!java.util.Objects.equals(couponOpt.get().getShopId(), shopOpt.get().getId())) {
             return ResponseEntity.status(403).body(Map.of("success", false, "message", "Không có quyền xóa"));
         }
 
