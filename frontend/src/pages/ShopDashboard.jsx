@@ -8,6 +8,7 @@ export default function ShopDashboard() {
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
     const [customRequests, setCustomRequests] = useState([]);
+    const [refunds, setRefunds] = useState([]);
     const [profile, setProfile] = useState({ shopName: '', description: '', phoneNumber: '', shopAddress: '' });
     const [loading, setLoading] = useState(true);
 
@@ -59,13 +60,15 @@ export default function ShopDashboard() {
             fetch('/api/shop/products', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
             fetch('/api/shop/orders', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
             fetch('/api/shop/custom-requests', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
+            fetch('/api/shop/reports', { credentials: 'include' }).then(res => res.ok ? res.json() : []),
             fetch('/api/colors').then(res => res.ok ? res.json() : []),
             fetch('/api/materials').then(res => res.ok ? res.json() : [])
-        ]).then(([profileData, prods, ords, reqs, colors, materials]) => {
+        ]).then(([profileData, prods, ords, reqs, refs, colors, materials]) => {
             if (profileData.shopName) setProfile(profileData);
             if (Array.isArray(prods)) setProducts(prods);
             if (Array.isArray(ords)) setOrders(ords);
             if (Array.isArray(reqs)) setCustomRequests(reqs);
+            if (Array.isArray(refs)) setRefunds(refs);
             if (Array.isArray(colors)) setAllColors(colors);
             if (Array.isArray(materials)) setAllMaterials(materials);
         }).finally(() => setLoading(false));
@@ -187,6 +190,18 @@ export default function ShopDashboard() {
         } catch (err) { console.error(err); }
     };
 
+    const updateRefundStatus = async (id, status) => {
+        try {
+            const res = await fetch(`/api/shop/reports/${id}/status?status=${status}`, { method: 'PUT', credentials: 'include' });
+            if (res.ok) {
+                setRefunds(refunds.map(r => r.id === id ? { ...r, status } : r));
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Lỗi cập nhật trạng thái hoàn tiền');
+            }
+        } catch (err) { console.error(err); }
+    };
+
     // --- LOGIC HỒ SƠ ---
     const handleSaveProfile = async (e) => {
         e.preventDefault();
@@ -302,13 +317,13 @@ export default function ShopDashboard() {
                         <p>Quản lý không gian sáng tạo của bạn</p>
                     </div>
                     <nav className="shop-tab-nav">
-                        {['products', 'orders', 'custom_requests', 'profile'].map(tab => (
+                        {['products', 'orders', 'custom_requests', 'refunds', 'profile'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`shop-tab-btn ${activeTab === tab ? 'active' : ''}`}
                             >
-                                {tab === 'products' ? 'Sản phẩm' : tab === 'orders' ? 'Đơn hàng' : tab === 'custom_requests' ? 'Yêu cầu Custom' : 'Hồ sơ'}
+                                {tab === 'products' ? 'Sản phẩm' : tab === 'orders' ? 'Đơn hàng' : tab === 'custom_requests' ? 'Yêu cầu Custom' : tab === 'refunds' ? 'Trả hàng / Hoàn tiền' : 'Hồ sơ'}
                             </button>
                         ))}
                     </nav>
@@ -474,6 +489,54 @@ export default function ShopDashboard() {
                                         </div>
                                     ))}
                                     {customRequests.length === 0 && <div className="shop-empty">Chưa có yêu cầu custom nào ✨</div>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- TAB TRẢ HÀNG --- */}
+                        {activeTab === 'refunds' && (
+                            <div className="shop-animate-in">
+                                <div className="shop-section-header">
+                                    <h2>Quản lý Yêu cầu Trả hàng / Hoàn tiền</h2>
+                                </div>
+                                <div className="order-list">
+                                    {refunds.map(r => (
+                                        <div key={r.id} className="order-card">
+                                            <div className="order-info">
+                                                <h3>Yêu cầu hoàn tiền Đơn hàng #{r.orderId}</h3>
+                                                <p><strong>Lý do:</strong> {
+                                                    r.reason === 'NOT_RECEIVED' ? 'Không nhận được hàng' :
+                                                    r.reason === 'DAMAGED' ? 'Hàng bị hư hỏng / vỡ' :
+                                                    r.reason === 'WRONG_ITEM' ? 'Hàng không đúng mô tả' :
+                                                    r.reason === 'WRONG_COLOR' ? 'Hàng sai màu / mẫu' :
+                                                    r.reason === 'MISSING_ITEM' ? 'Thiếu hàng / phụ kiện' : 'Lý do khác'
+                                                }</p>
+                                                <p><strong>Mô tả chi tiết:</strong> {r.description || 'Không có'}</p>
+                                                {r.evidenceUrl && (
+                                                    <div style={{ marginTop: '10px' }}>
+                                                        <a href={`http://localhost:8080${r.evidenceUrl}`} target="_blank" rel="noreferrer">
+                                                            <img src={`http://localhost:8080${r.evidenceUrl}`} alt="Bằng chứng" style={{ maxWidth: '120px', borderRadius: '8px', border: '1px solid #ddd', cursor: 'pointer' }} />
+                                                        </a>
+                                                        <p style={{ fontSize: '12px', color: '#888' }}>(Bấm vào ảnh để xem lớn)</p>
+                                                    </div>
+                                                )}
+                                                <p style={{ fontSize: '12px', color: '#888', marginTop: '10px' }}>Ngày tạo: {new Date(r.createdAt).toLocaleString('vi-VN')}</p>
+                                            </div>
+                                            <div className="order-actions" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
+                                                {r.status === 0 && <span className="status-badge status-pending">Chờ xử lý</span>}
+                                                {r.status === 1 && <span className="status-badge status-approved">Đã chấp nhận hoàn tiền</span>}
+                                                {r.status === 2 && <span className="status-badge status-cancelled">Đã từ chối</span>}
+                                                
+                                                {r.status === 0 && (
+                                                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                                        <button className="btn-approve" onClick={() => updateRefundStatus(r.id, 1)}>Chấp nhận</button>
+                                                        <button className="btn-cancel" onClick={() => updateRefundStatus(r.id, 2)}>Từ chối</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {refunds.length === 0 && <div className="shop-empty">Chưa có yêu cầu hoàn tiền nào 💸</div>}
                                 </div>
                             </div>
                         )}

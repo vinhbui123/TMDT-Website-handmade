@@ -86,7 +86,7 @@ function OrderHistory() {
 
     const handleSubmitReport = async () => {
         if (!reportForm.reason) {
-            alert('Vui lòng chọn lý do báo cáo!');
+            alert('Vui lòng chọn lý do trả hàng/hoàn tiền!');
             return;
         }
         setSubmitting(true);
@@ -253,7 +253,7 @@ function OrderHistory() {
                                                     background: '#f0f0f0', color: '#888',
                                                     borderRadius: '20px', fontSize: '0.8rem'
                                                 }}>
-                                                    ✓ Đã gửi báo cáo
+                                                    ✓ Đã yêu cầu Trả hàng/Hoàn tiền
                                                 </span>
                                             ) : (
                                                 <button
@@ -267,7 +267,7 @@ function OrderHistory() {
                                                     onMouseEnter={e => { e.target.style.background = '#ee4d2d'; e.target.style.color = '#fff'; }}
                                                     onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = '#ee4d2d'; }}
                                                 >
-                                                    Báo cáo sản phẩm
+                                                    Yêu cầu Trả hàng/Hoàn tiền
                                                 </button>
                                             )}
                                         </div>
@@ -310,7 +310,7 @@ function OrderHistory() {
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                         }}>
                             <div>
-                                <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Báo cáo sản phẩm</div>
+                                <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Yêu cầu Trả hàng/Hoàn tiền</div>
                                 <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '2px' }}>Đơn hàng #{reportModal}</div>
                             </div>
                             <button
@@ -331,7 +331,7 @@ function OrderHistory() {
 
                             {/* Lý do */}
                             <div style={{ marginBottom: '16px' }}>
-                                <div style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>Lý do báo cáo *</div>
+                                <div style={{ fontWeight: '600', marginBottom: '10px', color: '#333' }}>Lý do Trả hàng/Hoàn tiền *</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {REPORT_REASONS.map(r => (
                                         <label
@@ -416,7 +416,7 @@ function OrderHistory() {
                                         fontWeight: '700', fontSize: '0.95rem', transition: 'all 0.2s'
                                     }}
                                 >
-                                    {submitting ? 'Đang gửi...' : '🚩 Gửi báo cáo'}
+                                    {submitting ? 'Đang gửi...' : '🚩 Gửi yêu cầu'}
                                 </button>
                             </div>
                         </div>

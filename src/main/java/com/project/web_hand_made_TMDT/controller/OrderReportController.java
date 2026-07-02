@@ -61,17 +61,17 @@ public class OrderReportController {
 
         // Chỉ cho phép báo cáo khi đơn hàng đã Hoàn thành (status = 3)
         if (order.getStatus() != 3) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Chỉ có thể báo cáo đơn hàng đã giao"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Chỉ có thể yêu cầu trả hàng/hoàn tiền cho đơn hàng đã giao"));
         }
 
         // Chặn báo cáo trùng (1 user chỉ báo cáo 1 lần / đơn)
         if (orderReportRepository.existsByOrderIdAndUserId(orderId, userId)) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Bạn đã báo cáo đơn hàng này rồi"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Bạn đã gửi yêu cầu trả hàng/hoàn tiền cho đơn hàng này rồi"));
         }
 
         // Validate payload
         if (reason == null || reason.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Vui lòng chọn lý do báo cáo"));
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Vui lòng chọn lý do trả hàng/hoàn tiền"));
         }
 
         String evidenceUrl = null;
@@ -103,7 +103,7 @@ public class OrderReportController {
                 .build();
         orderReportRepository.save(report);
 
-        return ResponseEntity.ok(Map.of("success", true, "message", "Báo cáo đã được gửi thành công. Chúng tôi sẽ xem xét và phản hồi trong 24h."));
+        return ResponseEntity.ok(Map.of("success", true, "message", "Yêu cầu trả hàng/hoàn tiền đã được gửi thành công. Chúng tôi sẽ xem xét và phản hồi trong 24h."));
     }
 
     /**

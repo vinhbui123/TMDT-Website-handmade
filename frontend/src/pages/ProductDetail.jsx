@@ -70,7 +70,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
         }
     };
 
-    const handleAddToCart = async () => {
+    const handleAddToCart = async (silent = false) => {
         try {
             // Nối dữ liệu customData thành chuỗi text
             const customTextArray = Object.entries(customData)
@@ -96,21 +96,36 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
             });
             const data = await res.json();
             if (data.success) {
-                alert('Thêm vào giỏ hàng thành công!');
+                if (!silent) alert('Thêm vào giỏ hàng thành công!');
                 if (updateCartCount) updateCartCount();
                 // Trigger event for App.jsx to update count if updateCartCount prop is not passed directly
                 window.dispatchEvent(new Event('cartUpdated'));
+                return true;
             } else {
-                alert(data.message || 'Lỗi khi thêm vào giỏ hàng');
+                if (!silent) alert(data.message || 'Lỗi khi thêm vào giỏ hàng');
+                return false;
             }
         } catch (err) {
-            alert('Lỗi kết nối giỏ hàng!');
+            if (!silent) alert('Lỗi kết nối giỏ hàng!');
+            return false;
         }
     };
 
     const handleBuyNow = async () => {
-        await handleAddToCart();
-        navigate('/cart');
+        const success = await handleAddToCart(true);
+        if (success) {
+            const surcharge = getCustomSurcharge();
+            const baseDiscountPrice = product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price;
+            const finalPrice = baseDiscountPrice + surcharge;
+            const totalAmount = finalPrice * quantity;
+            
+            navigate('/checkout', {
+                state: {
+                    selectedProductIds: [product.id],
+                    totalAmount: totalAmount
+                }
+            });
+        }
     };
 
     const submitCustomRequest = async (e) => {
