@@ -118,81 +118,81 @@ function CartPage() {
                 <div className="cart-content">
                     <table className="cart-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px' }}>
                         <thead>
-                        <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #ddd' }}>
-                            <th style={{ padding: '15px', textAlign: 'center' }}>
-                                <input
-                                    type="checkbox"
-                                    onChange={handleSelectAll}
-                                    checked={selectedIds.length === cart.items.length && cart.items.length > 0}
-                                />
-                            </th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>Sản phẩm</th>
-                            <th style={{ padding: '15px', textAlign: 'center' }}>Đơn giá</th>
-                            <th style={{ padding: '15px', textAlign: 'center' }}>Số lượng</th>
-                            <th style={{ padding: '15px', textAlign: 'right' }}>Thành tiền</th>
-                            <th style={{ padding: '15px', textAlign: 'center' }}>Thao tác</th>
-                        </tr>
+                            <tr style={{ background: '#f8f9fa', borderBottom: '1px solid #ddd' }}>
+                                <th style={{ padding: '15px', textAlign: 'center' }}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleSelectAll}
+                                        checked={selectedIds.length === cart.items.length && cart.items.length > 0}
+                                    />
+                                </th>
+                                <th style={{ padding: '15px', textAlign: 'left' }}>Sản phẩm</th>
+                                <th style={{ padding: '15px', textAlign: 'center' }}>Đơn giá</th>
+                                <th style={{ padding: '15px', textAlign: 'center' }}>Số lượng</th>
+                                <th style={{ padding: '15px', textAlign: 'right' }}>Thành tiền</th>
+                                <th style={{ padding: '15px', textAlign: 'center' }}>Thao tác</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {cart.items.map((item) => {
-                            const discountedPrice = item.price * (1 - (item.discount || 0) / 100);
-                            const subtotal = discountedPrice * item.quantity;
+                            {cart.items.map((item) => {
+                                const discountedPrice = item.price * (1 - (item.discount || 0) / 100);
+                                const subtotal = discountedPrice * item.quantity;
 
-                            return (
-                                <tr key={item.productId} style={{ borderBottom: '1px solid #eee' }}>
-                                    <td style={{ textAlign: 'center' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedIds.includes(item.productId)}
-                                            onChange={() => handleSelectProduct(item.productId)}
-                                        />
-                                    </td>
-                                    <td style={{ padding: '15px' }}>
-                                        <Link to={`/product-detail?id=${item.productId}`} style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-                                            <img src={item.productImage} alt={item.productName} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '15px' }} />
-                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                <span style={{ fontWeight: '500' }}>{item.productName}</span>
-                                                {item.selectedColor && (
-                                                    <span style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                                        Màu sắc: {item.selectedColor}
-                                                    </span>
-                                                )}
-                                                {item.customText && (
-                                                    <span style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
-                                                        Tùy chỉnh: {item.customText}
-                                                    </span>
-                                                )}
+                                return (
+                                    <tr key={item.productId} style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.includes(item.productId)}
+                                                onChange={() => handleSelectProduct(item.productId)}
+                                            />
+                                        </td>
+                                        <td style={{ padding: '15px' }}>
+                                            <Link to={`/product/${item.productId}`} style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+                                                <img src={item.productImage} alt={item.productName} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', marginRight: '15px' }} />
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontWeight: '500' }}>{item.productName}</span>
+                                                    {item.selectedColor && (
+                                                        <span style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                                            Màu sắc: {item.selectedColor}
+                                                        </span>
+                                                    )}
+                                                    {item.customText && (
+                                                        <span style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                                                            Tùy chỉnh: {item.customText}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        </td>
+                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                            {item.discount > 0 ? (
+                                                <div>
+                                                    <div style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>{formatPrice(item.price)}</div>
+                                                    <div style={{ color: '#ee4d2d', fontWeight: 'bold' }}>{formatPrice(discountedPrice)}</div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ fontWeight: 'bold' }}>{formatPrice(item.price)}</div>
+                                            )}
+                                        </td>
+                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                <button onClick={() => handleUpdateQty(item.productId, item.quantity - 1)} style={{ padding: '2px 8px' }}>-</button>
+                                                <span style={{ margin: '0 10px' }}>{item.quantity}</span>
+                                                <button onClick={() => handleUpdateQty(item.productId, item.quantity + 1)} style={{ padding: '2px 8px' }}>+</button>
                                             </div>
-                                        </Link>
-                                    </td>
-                                    <td style={{ padding: '15px', textAlign: 'center' }}>
-                                        {item.discount > 0 ? (
-                                            <div>
-                                                <div style={{ textDecoration: 'line-through', color: '#999', fontSize: '12px' }}>{formatPrice(item.price)}</div>
-                                                <div style={{ color: '#ee4d2d', fontWeight: 'bold' }}>{formatPrice(discountedPrice)}</div>
-                                            </div>
-                                        ) : (
-                                            <div style={{ fontWeight: 'bold' }}>{formatPrice(item.price)}</div>
-                                        )}
-                                    </td>
-                                    <td style={{ padding: '15px', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                            <button onClick={() => handleUpdateQty(item.productId, item.quantity - 1)} style={{ padding: '2px 8px' }}>-</button>
-                                            <span style={{ margin: '0 10px' }}>{item.quantity}</span>
-                                            <button onClick={() => handleUpdateQty(item.productId, item.quantity + 1)} style={{ padding: '2px 8px' }}>+</button>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold', color: '#ee4d2d' }}>
-                                        {formatPrice(subtotal)}
-                                    </td>
-                                    <td style={{ padding: '15px', textAlign: 'center' }}>
-                                        <button onClick={() => handleRemoveItem(item.productId)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>
-                                            <i className="fa-solid fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                        </td>
+                                        <td style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold', color: '#ee4d2d' }}>
+                                            {formatPrice(subtotal)}
+                                        </td>
+                                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                                            <button onClick={() => handleRemoveItem(item.productId)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
 

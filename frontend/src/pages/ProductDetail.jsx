@@ -71,6 +71,19 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
     };
 
     const handleAddToCart = async (silent = false) => {
+        // KIỂM TRA VALIDATION: Bắt buộc đối với các trường chọn (select), bỏ qua text
+        if (customizeFields && customizeFields.length > 0) {
+            for (const field of customizeFields) {
+                if (field.fieldType !== 'text' && field.fieldType !== 'textarea') {
+                    const value = customData[`field_${field.id}`];
+                    if (!value || value.toString().trim() === '') {
+                        alert('Bạn chưa lựa chọn thông tin cho phần: ' + field.fieldLabel);
+                        return false;
+                    }
+                }
+            }
+        }
+
         try {
             // Nối dữ liệu customData thành chuỗi text
             const customTextArray = Object.entries(customData)
@@ -118,7 +131,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
             const baseDiscountPrice = product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price;
             const finalPrice = baseDiscountPrice + surcharge;
             const totalAmount = finalPrice * quantity;
-            
+
             navigate('/checkout', {
                 state: {
                     selectedProductIds: [product.id],
@@ -185,7 +198,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                 {customizeFields.map((field, idx) => (
                     <div key={idx} style={{ marginBottom: idx < customizeFields.length - 1 ? '12px' : 0 }}>
                         <label style={{ fontWeight: 600, fontSize: '14px', display: 'block', marginBottom: '5px' }}>
-                            {field.fieldLabel}{field.required && <span style={{ color: 'red' }}> *</span>}
+                            {field.fieldLabel} {field.fieldType !== 'text' && field.fieldType !== 'textarea' && <span style={{ color: 'red' }}>*</span>}
                         </label>
 
                         {field.fieldType === 'text' && (

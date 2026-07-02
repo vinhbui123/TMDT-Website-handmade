@@ -30,10 +30,15 @@ public class CartController {
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@RequestBody Map<String, Object> request) {
         try {
+            System.out.println("=== ADD TO CART REQUEST ===");
+            System.out.println("Payload: " + request);
+            
             int productId = Integer.parseInt(request.get("productId").toString());
             int quantity = Integer.parseInt(request.getOrDefault("quantity", 1).toString());
             String customText = (request.containsKey("customText") && request.get("customText") != null) ? request.get("customText").toString() : null;
             String selectedColor = (request.containsKey("selectedColor") && request.get("selectedColor") != null) ? request.get("selectedColor").toString() : null;
+            
+            System.out.println("Parsed -> Product: " + productId + ", Qty: " + quantity + ", CustomText: " + customText + ", Color: " + selectedColor);
 
             Cart cart = cartService.addProductToCart(productId, quantity, customText, selectedColor);
 
@@ -41,8 +46,9 @@ public class CartController {
                     "success", true,
                     "cartCount", cart.getTotalQuantity() // Trả về tổng số lượng (ví dụ: 2 táo + 1 cam = 3)
             ));
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage() != null ? e.getMessage() : e.toString()));
         }
     }
 
@@ -88,8 +94,9 @@ public class CartController {
                     "success", true,
                     "cartCount", cart.getTotalQuantity(),
                     "total", cart.calculateTotal()));
-        } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage() != null ? e.getMessage() : e.toString()));
         }
     }
 
