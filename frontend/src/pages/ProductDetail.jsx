@@ -87,8 +87,8 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
             const res = await fetch('/api/cart/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    productId: product.id, 
+                body: JSON.stringify({
+                    productId: product.id,
                     quantity,
                     customText: customTextString || null,
                     selectedColor: selectedColor?.name || null
@@ -99,7 +99,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                 alert('Thêm vào giỏ hàng thành công!');
                 if (updateCartCount) updateCartCount();
                 // Trigger event for App.jsx to update count if updateCartCount prop is not passed directly
-                window.dispatchEvent(new Event('cartUpdated')); 
+                window.dispatchEvent(new Event('cartUpdated'));
             } else {
                 alert(data.message || 'Lỗi khi thêm vào giỏ hàng');
             }
@@ -170,7 +170,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                 {customizeFields.map((field, idx) => (
                     <div key={idx} style={{ marginBottom: idx < customizeFields.length - 1 ? '12px' : 0 }}>
                         <label style={{ fontWeight: 600, fontSize: '14px', display: 'block', marginBottom: '5px' }}>
-                            {field.fieldLabel}{field.required && <span style={{color:'red'}}> *</span>}
+                            {field.fieldLabel}{field.required && <span style={{ color: 'red' }}> *</span>}
                         </label>
 
                         {field.fieldType === 'text' && (
@@ -224,15 +224,15 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
 
 
 
-    if (loading) return <div style={{textAlign: 'center', padding: '50px'}}>Đang tải...</div>;
-    if (error) return <div style={{textAlign: 'center', padding: '50px', color: 'red'}}>Lỗi: {error}</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Đang tải...</div>;
+    if (error) return <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>Lỗi: {error}</div>;
     if (!product) return null;
 
     const surcharge = getCustomSurcharge();
-    const baseDiscountPrice = product.discount > 0 ? product.price * (1 - product.discount/100) : product.price;
+    const baseDiscountPrice = product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price;
     const finalPrice = baseDiscountPrice + surcharge;
 
-    const averageRating = comments.length > 0 
+    const averageRating = comments.length > 0
         ? (comments.reduce((sum, c) => sum + c.rating, 0) / comments.length).toFixed(1)
         : 0;
 
@@ -259,11 +259,11 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     <div className="breadcrumb">
                         <ul>
                             <li><Link to="/">Trang chủ &gt;</Link></li>
-                            <li style={{marginLeft: 5}}>Chi tiết sản phẩm</li>
+                            <li style={{ marginLeft: 5 }}>Chi tiết sản phẩm</li>
                         </ul>
                     </div>
                     <div className="name">{product.name}</div>
-                    
+
                     <div className="rating-overview-top" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
                         <div className="rating-stars" style={{ color: '#f27a24', fontSize: '14px' }}>
                             {[1, 2, 3, 4, 5].map(i => (
@@ -279,7 +279,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                         {product.discount > 0 ? (
                             <>
                                 {finalPrice.toLocaleString()}đ
-                                <span className="old-price" style={{marginLeft: 10}}>{(product.price + surcharge).toLocaleString()}đ</span>
+                                <span className="old-price" style={{ marginLeft: 10 }}>{(product.price + surcharge).toLocaleString()}đ</span>
                             </>
                         ) : (
                             `${finalPrice.toLocaleString()}đ`
@@ -289,8 +289,8 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     <div className="color-selector">
                         <p>Màu sắc :</p>
                         {product.colors && product.colors.map((color, idx) => (
-                            <div 
-                                key={idx} 
+                            <div
+                                key={idx}
                                 className={`color-item ${selectedColor?.id === color.id ? 'active' : ''}`}
                                 onClick={() => setSelectedColor(color)}
                             >
@@ -301,14 +301,14 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
 
                     <div className="quantity">
                         <p>Số lượng :</p>
-                        <input 
-                            type="number" 
-                            min="1" 
-                            value={quantity} 
-                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} 
+                        <input
+                            type="number"
+                            min="1"
+                            value={quantity}
+                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                         />
                     </div>
-                    
+
                     <div className="stock-quantity">
                         Kho: {product.quantity}
                     </div>
@@ -318,7 +318,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
 
                     <div className="btn-box" style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
                         <button className="cart-btn" onClick={handleAddToCart} style={{ flex: 1, padding: '12px 0', fontSize: '16px' }}>
-                            <i className="fa-solid fa-cart-plus" style={{marginRight: 8}}></i>Thêm Vào Giỏ Hàng
+                            <i className="fa-solid fa-cart-plus" style={{ marginRight: 8 }}></i>Thêm Vào Giỏ Hàng
                         </button>
                         <button className="buy-btn" onClick={handleBuyNow} style={{ flex: 1, padding: '12px 0', fontSize: '16px' }}>
                             Mua Ngay
@@ -329,7 +329,7 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     {(() => {
                         // Map chất liệu đặc biệt hỗ trợ gia công (khắc, sơn, in)
                         const specialMaterialMap = {
-                            'gỗ': 'khắc gỗ',
+                            'gỗ': 'sơn, đánh bóng,...',
                             'thủy tinh': 'khắc thủy tinh',
                             'kim nhung': 'sơn kim nhung'
                         };
@@ -348,10 +348,10 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                                 <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '10px' }}>
                                     Sản phẩm này hỗ trợ thiết kế đặc biệt: <strong>{matchedSpecials.join(', ')}</strong> (có tính phí).
                                 </p>
-                                <button 
+                                <button
                                     style={{
-                                        width: '100%', padding: '12px', borderRadius: '8px', 
-                                        background: '#fff', border: '1px solid #8B5E34', color: '#8B5E34', 
+                                        width: '100%', padding: '12px', borderRadius: '8px',
+                                        background: '#fff', border: '1px solid #8B5E34', color: '#8B5E34',
                                         fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.3s'
                                     }}
                                     onMouseOver={(e) => { e.target.style.background = '#8B5E34'; e.target.style.color = '#fff'; }}
@@ -370,21 +370,21 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
             {product.shop && (
                 <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '20px 30px', margin: '20px auto', background: '#fff', 
+                    padding: '20px 30px', margin: '20px auto', background: '#fff',
                     borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
                     maxWidth: '1200px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <div style={{ position: 'relative' }}>
-                            <img 
-                                src={product.shop.shopLogo || 'https://placehold.co/80x80?text=Shop'} 
-                                alt={product.shop.shopName} 
+                            <img
+                                src={product.shop.shopLogo || 'https://placehold.co/80x80?text=Shop'}
+                                alt={product.shop.shopName}
                                 style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }}
                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/80x80?text=Shop'; }}
                             />
                             {product.shop.status === 1 && (
                                 <span style={{
-                                    position: 'absolute', bottom: 0, right: 0, background: '#ee4d2d', 
+                                    position: 'absolute', bottom: 0, right: 0, background: '#ee4d2d',
                                     color: '#fff', fontSize: '10px', padding: '2px 6px', borderRadius: '10px', fontWeight: 'bold'
                                 }}>Mall</span>
                             )}
@@ -403,20 +403,20 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
                         {(!user?.id || String(user.id) !== String(product.shop.userId || product.shop.id || product.userId || product.shop_id || product.id_user)) && (
-                            <button 
+                            <button
                                 onClick={() => openChat && openChat(product)}
-                                style={{ 
-                                    padding: '10px 20px', border: '1px solid #ee4d2d', background: '#fff5f3', 
+                                style={{
+                                    padding: '10px 20px', border: '1px solid #ee4d2d', background: '#fff5f3',
                                     color: '#ee4d2d', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
                                 }}
                             >
                                 <i className="fas fa-comments"></i> Chat Ngay
                             </button>
                         )}
-                        <button 
+                        <button
                             onClick={() => window.location.href = `/shop/${product.shop.id}`}
-                            style={{ 
-                                padding: '10px 20px', border: '1px solid #e0e0e0', background: '#fff', 
+                            style={{
+                                padding: '10px 20px', border: '1px solid #e0e0e0', background: '#fff',
                                 color: '#555', borderRadius: '4px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
                             }}
                         >
@@ -485,17 +485,17 @@ const ProductDetail = ({ user, updateCartCount, openChat }) => {
                         <form onSubmit={submitCustomRequest}>
                             <div style={{ marginBottom: '15px' }}>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Mô tả chi tiết yêu cầu:</label>
-                                <textarea 
+                                <textarea
                                     required
                                     value={customRequestDesc}
                                     onChange={(e) => setCustomRequestDesc(e.target.value)}
-                                    placeholder="VD: Tôi muốn khắc thêm logo công ty bằng laser lên mặt gỗ..."
+                                    placeholder="VD: Tôi muốn sơn lại màu đỏ, đánh bóng bề mặt..."
                                     style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc', minHeight: '100px', resize: 'vertical' }}
                                 />
                             </div>
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>Đường dẫn ảnh minh họa (URL) - Nếu có:</label>
-                                <input 
+                                <input
                                     type="text"
                                     value={customRequestImgUrl}
                                     onChange={(e) => setCustomRequestImgUrl(e.target.value)}

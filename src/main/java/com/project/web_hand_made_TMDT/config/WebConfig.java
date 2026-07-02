@@ -43,6 +43,9 @@ public class WebConfig implements WebMvcConfigurer {
 
         String reportsPath = Paths.get("uploads/images/reports/").toAbsolutePath().toUri().toString();
 
+        // Thư mục chứa ảnh CCCD của người đăng ký bán hàng
+        String documentsPath = Paths.get("uploads/images/documents/").toAbsolutePath().toUri().toString();
+
         // Khi Frontend (React) gọi link ảnh dạng /images/logos/ten_file.png,
         registry.addResourceHandler("/images/logos/**")
                 .addResourceLocations(logosPath);
@@ -50,6 +53,10 @@ public class WebConfig implements WebMvcConfigurer {
         // Ảnh bằng chứng báo cáo
         registry.addResourceHandler("/images/reports/**")
                 .addResourceLocations(reportsPath);
+
+        // Ảnh CCCD (mặt trước / mặt sau) của người đăng ký bán hàng
+        registry.addResourceHandler("/images/documents/**")
+                .addResourceLocations(documentsPath);
 
         // Phục vụ tất cả ảnh khác từ cả thư mục frontend và backend
         registry.addResourceHandler("/images/**")

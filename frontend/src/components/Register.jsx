@@ -143,7 +143,7 @@ const Register = () => {
                         </label>
                     </div>
 
-                    <div className="btn-register">
+                    <div className="register-submit-btn">
                         <button type="submit">Đăng Kí Ngay</button>
                     </div>
 

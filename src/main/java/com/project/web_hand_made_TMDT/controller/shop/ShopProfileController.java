@@ -56,19 +56,53 @@ public class ShopProfileController {
      * Nếu user chưa có shop thì tạo mới.
      */
     private static final String UPLOAD_DIR = "uploads/images/logos/";
+    private static final String UPLOAD_DIR_DOCS = "uploads/images/documents/";
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final java.util.Set<String> ALLOWED_CONTENT_TYPES = java.util.Set.of(
+        "image/jpeg", "image/png", "image/gif", "image/webp"
+    );
 
     @PostMapping("/me")
     public ResponseEntity<?> updateShopProfile(
             @RequestParam("shopName") String shopName,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "shopAddress", required = false) String shopAddress,
+            @RequestParam(value = "ownerName", required = false) String ownerName,
+            @RequestParam(value = "identityCardNumber", required = false) String identityCardNumber,
+            @RequestParam(value = "taxCode", required = false) String taxCode,
             @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "identityCardFront", required = false) MultipartFile identityCardFront,
+            @RequestParam(value = "identityCardBack", required = false) MultipartFile identityCardBack,
             HttpServletRequest request) {
 
         Integer loggedInUserId = getLoggedInUserId(request);
         if (loggedInUserId == null) {
             return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập"));
         }
+
+        // === VALIDATION ===
+        if (shopName == null || shopName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Tên shop không được để trống."));
+        }
+        if (shopAddress == null || shopAddress.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Địa chỉ shop không được để trống."));
+        }
+        if (ownerName == null || ownerName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Họ tên chủ shop không được để trống."));
+        }
+        if (identityCardNumber != null && !identityCardNumber.trim().isEmpty()) {
+            if (!identityCardNumber.trim().matches("\\d{12}")) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Số CCCD phải gồm đúng 12 chữ số."));
+            }
+        }
+
+        // Validate file uploads (MIME type + size)
+        String fileError = validateFile(file, "Logo");
+        if (fileError != null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", fileError));
+        fileError = validateFile(identityCardFront, "Ảnh CCCD mặt trước");
+        if (fileError != null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", fileError));
+        fileError = validateFile(identityCardBack, "Ảnh CCCD mặt sau");
+        if (fileError != null) return ResponseEntity.badRequest().body(Map.of("success", false, "message", fileError));
 
         Shop shop = shopRepository.findByUserId(loggedInUserId).orElseGet(() -> {
             Shop newShop = new Shop();
@@ -78,32 +112,62 @@ public class ShopProfileController {
             return newShop;
         });
 
-        if (shopName != null) shop.setShopName(shopName);
-        if (description != null) shop.setDescription(description);
-        if (shopAddress != null) shop.setShopAddress(shopAddress);
+        if (shopName != null) shop.setShopName(shopName.trim());
+        if (description != null) shop.setDescription(description.trim());
+        if (shopAddress != null) shop.setShopAddress(shopAddress.trim());
+        if (ownerName != null) shop.setOwnerName(ownerName.trim());
+        if (identityCardNumber != null) shop.setIdentityCardNumber(identityCardNumber.trim());
+        if (taxCode != null) shop.setTaxCode(taxCode.trim());
+        
+        // Reset status to Pending (0) whenever updating profile for approval
+        if (shop.getStatus() == null || shop.getStatus() == 2 || shop.getStatus() == 0) {
+            shop.setStatus(0);
+        }
 
         try {
             if (file != null && !file.isEmpty()) {
-                File directory = new File(UPLOAD_DIR);
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                }
-                String originalFileName = file.getOriginalFilename();
-                String fileExtension = "";
-                if (originalFileName != null && originalFileName.contains(".")) {
-                    fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
-                }
-                String newFileName = UUID.randomUUID().toString() + fileExtension;
-                Path path = Paths.get(UPLOAD_DIR + newFileName);
-                Files.write(path, file.getBytes());
-                shop.setShopLogo("/images/logos/" + newFileName);
+                shop.setShopLogo(saveFile(file, UPLOAD_DIR));
+            }
+            if (identityCardFront != null && !identityCardFront.isEmpty()) {
+                shop.setIdentityCardFront(saveFile(identityCardFront, UPLOAD_DIR_DOCS));
+            }
+            if (identityCardBack != null && !identityCardBack.isEmpty()) {
+                shop.setIdentityCardBack(saveFile(identityCardBack, UPLOAD_DIR_DOCS));
             }
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("success", false, "message", "Lỗi tải ảnh: " + e.getMessage()));
         }
 
         Shop savedShop = shopRepository.save(shop);
-        return ResponseEntity.ok(Map.of("success", true, "data", savedShop));
+        return ResponseEntity.ok(Map.of("success", true, "data", savedShop, "message", "Hồ sơ của bạn đã được gửi và đang chờ Admin duyệt."));
+    }
+
+    private String validateFile(MultipartFile file, String fieldName) {
+        if (file == null || file.isEmpty()) return null;
+        if (file.getSize() > MAX_FILE_SIZE) {
+            return fieldName + " vượt quá kích thước tối đa 5MB.";
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            return fieldName + " phải là file ảnh (JPEG, PNG, GIF, WebP).";
+        }
+        return null;
+    }
+
+    private String saveFile(MultipartFile file, String uploadDir) throws Exception {
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFileName != null && originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        }
+        String newFileName = UUID.randomUUID().toString() + fileExtension;
+        Path path = Paths.get(uploadDir + newFileName);
+        Files.write(path, file.getBytes());
+        return "/" + uploadDir.replace("uploads/", "") + newFileName;
     }
 
     /**

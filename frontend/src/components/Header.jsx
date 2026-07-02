@@ -140,19 +140,25 @@ function Header({ user, categories, cartCount }) {
 
           {/* Actions */}
           <div className="header-action">
-            {/* Seller Dashboard Button */}
+            {/* Seller / Register Shop Button */}
             {user && user.role === 2 && (
               <a href="/ShopDashBoard" className="header-role-btn seller-btn" id="seller-dashboard-btn">
                 <i className="fa-solid fa-store"></i>
                 <span>Kênh Người Bán</span>
               </a>
             )}
+            {user && user.role === 0 && (
+              <a href="/register-shop" className="header-role-btn seller-btn" id="register-shop-btn" style={{ background: '#f39c12' }}>
+                <i className="fa-solid fa-store"></i>
+                <span>Đăng Ký Bán Hàng</span>
+              </a>
+            )}
 
             {/* Admin Button */}
             {user && user.role === 1 && (
-              <a href="/adminProducts" className="header-role-btn admin-btn">
+              <a href="/admin-shops" className="header-role-btn admin-btn">
                 <i className="fa-solid fa-user-tie"></i>
-                <span>Quản Trị</span>
+                <span>Duyệt Shop</span>
               </a>
             )}
 
