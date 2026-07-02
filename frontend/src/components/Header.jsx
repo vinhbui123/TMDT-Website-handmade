@@ -270,6 +270,7 @@ function Header({ user, categories, cartCount }) {
           <ul className="menu">
             <li><a href="/">TRANG CHỦ</a></li>
             <li><a href="/products">SẢN PHẨM</a></li>
+            <li><a href="/shops">GIAN HÀNG</a></li>
             {categories && categories.map((cat) => (
               <li key={cat.id}>
                 <a href={`/list-product?category=${cat.id}`}>{cat.name}</a>

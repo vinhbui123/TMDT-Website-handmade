@@ -52,6 +52,21 @@ public class ShopProfileController {
     }
 
     /**
+     * Tìm kiếm gian hàng (chỉ trả về shop đã được duyệt - status=1).
+     * Nếu có keyword → tìm theo tên, nếu không → trả tất cả.
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> searchShops(@RequestParam(value = "keyword", required = false) String keyword) {
+        java.util.List<Shop> shops;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            shops = shopRepository.findByShopNameContainingIgnoreCaseAndStatus(keyword.trim(), 1);
+        } else {
+            shops = shopRepository.findByStatus(1);
+        }
+        return ResponseEntity.ok(shops);
+    }
+
+    /**
      * Cập nhật thông tin shop.
      * Nếu user chưa có shop thì tạo mới.
      */

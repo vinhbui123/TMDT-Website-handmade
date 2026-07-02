@@ -17,4 +17,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     @Transactional
     @Query("UPDATE OrderDetail od SET od.status = :status WHERE od.orderId = :orderId")
     void updateStatusByOrderId(@Param("orderId") int orderId, @Param("status") int status);
+
+    @Query("SELECT od FROM OrderDetail od WHERE od.product.shop.id = :shopId AND od.status = :status")
+    List<OrderDetail> findByProductShopIdAndStatus(@Param("shopId") int shopId, @Param("status") int status);
 }

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +23,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final CartService cartService;
     private final GHNService ghnService;
+    private final CouponRepository couponRepository;
 
     @Transactional
     public Order placeOrder(int userId, String paymentMethod, List<Integer> selectedProductIds, Map<String, Object> payload) {
@@ -79,6 +81,19 @@ public class OrderService {
             }
 
             cartService.removeProductFromCart(item.getProductId());
+        }
+
+        // Xử lý mã giảm giá nếu có
+        if (payload.containsKey("couponCode") && payload.get("couponCode") != null) {
+            String couponCode = payload.get("couponCode").toString().trim().toUpperCase();
+            if (!couponCode.isEmpty()) {
+                Optional<Coupon> couponOpt = couponRepository.findByCode(couponCode);
+                if (couponOpt.isPresent()) {
+                    Coupon coupon = couponOpt.get();
+                    coupon.setUsedCount(coupon.getUsedCount() + 1);
+                    couponRepository.save(coupon);
+                }
+            }
         }
 
         return savedOrder;
