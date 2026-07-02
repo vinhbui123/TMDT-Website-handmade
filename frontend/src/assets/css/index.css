@@ -44,54 +44,7 @@ body {
 }
 
 /* --- Merged from assets/css/index.css --- */
-/* show banner*/
-.mainBanner {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-}
 
-.banner-show {
-    position: relative;
-    max-width: 1200px;
-    margin: auto;
-}
-
-.list-images {
-    position: relative;
-}
-
-.slide {
-    width: 100%;
-    display: none;
-}
-
-.slide:first-child {
-    display: block;
-}
-
-.prev,
-.next {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 10px;
-    font-size: 18px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    user-select: none;
-    z-index: 1000;
-}
-
-.prev {
-    left: 0;
-}
-
-.next {
-    right: 0;
-}
 
 /*Voucher giảm giá*/
 .discount-main {
