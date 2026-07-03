@@ -33,13 +33,13 @@ public class GHNController {
     }
 
     @GetMapping("/districts/{provinceId}")
-    public ResponseEntity<?> getDistricts(@PathVariable int provinceId) {
+    public ResponseEntity<?> getDistricts(@PathVariable("provinceId") int provinceId) {
         Object data = ghnService.getDistricts(provinceId);
         return ResponseEntity.ok(data);
     }
 
     @GetMapping("/wards/{districtId}")
-    public ResponseEntity<?> getWards(@PathVariable int districtId) {
+    public ResponseEntity<?> getWards(@PathVariable("districtId") int districtId) {
         Object data = ghnService.getWards(districtId);
         return ResponseEntity.ok(data);
     }
@@ -65,10 +65,17 @@ public class GHNController {
             int totalOrderValue = 0;
 
             List<Map<String, Object>> ghnItems = new ArrayList<>();
+            // Track the shop to resolve from_district_id
+            String shopAddress = null;
 
             for (CartItem item : itemsToOrder) {
                 Product product = productRepository.findById(item.getProductId()).orElse(null);
                 if (product != null) {
+                    // Grab shop address from the first product's shop
+                    if (shopAddress == null && product.getShop() != null && product.getShop().getShopAddress() != null) {
+                        shopAddress = product.getShop().getShopAddress();
+                    }
+
                     // Default sizes since Product doesn't have them yet
                     int w = 500; 
                     int length = 20; 
@@ -94,7 +101,10 @@ public class GHNController {
                 }
             }
 
-            int fee = ghnService.calculateFee(toDistrictId, toWardCode, totalWeight, orderLength, orderWidth, orderHeight, totalOrderValue, ghnItems);
+            // Resolve from_district_id dynamically from shop address
+            int fromDistrictId = ghnService.resolveDistrictIdFromAddress(shopAddress);
+
+            int fee = ghnService.calculateFee(fromDistrictId, toDistrictId, toWardCode, totalWeight, orderLength, orderWidth, orderHeight, totalOrderValue, ghnItems);
             
             return ResponseEntity.ok(Map.of("success", true, "fee", fee));
         } catch (Exception e) {

@@ -43,7 +43,7 @@ function Checkout() {
         fetch('/api/ghn/provinces')
             .then(res => res.json())
             .then(data => {
-                const filteredProvinces = (data || []).filter(p =>
+                const filteredProvinces = (Array.isArray(data) ? data : []).filter(p =>
                     !p.ProvinceName.toLowerCase().includes('test') &&
                     !p.ProvinceName.includes('02') &&
                     !p.ProvinceName.includes('03')
@@ -59,7 +59,7 @@ function Checkout() {
             fetch(`/api/ghn/districts/${selectedProvince}`)
                 .then(res => res.json())
                 .then(data => {
-                    setDistricts(data || []);
+                    setDistricts(Array.isArray(data) ? data : []);
                     setSelectedDistrict('');
                     setSelectedWard('');
                     setWards([]);
@@ -75,7 +75,7 @@ function Checkout() {
             fetch(`/api/ghn/wards/${selectedDistrict}`)
                 .then(res => res.json())
                 .then(data => {
-                    setWards(data || []);
+                    setWards(Array.isArray(data) ? data : []);
                     setSelectedWard('');
                     setShippingFee(0);
                 })

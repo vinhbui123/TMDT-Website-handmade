@@ -102,10 +102,10 @@ const UpdateProfile = () => {
                     <div className="profile-avatar-section">
                         <div className="profile-avatar-wrapper">
                             <img 
-                                src={avatarUrl || '/images/default-avatar.png'} 
+                                src={avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'User')}&background=D4A373&color=fff&size=150`} 
                                 alt="Avatar" 
                                 className="profile-avatar-img" 
-                                onError={(e) => { e.target.src = '/images/default-avatar.png' }}
+                                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=User&background=D4A373&color=fff&size=150` }}
                             />
                             <div className="profile-avatar-upload-btn" onClick={() => fileInputRef.current.click()}>
                                 <i className="fas fa-camera"></i> Thay đổi

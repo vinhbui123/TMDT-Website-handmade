@@ -5,9 +5,11 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.text.Normalizer;
 
 @Service
 @RequiredArgsConstructor
@@ -15,10 +17,13 @@ public class GHNService {
 
     private final RestTemplate restTemplate;
 
-    // Hardcoded for now (as requested)
+    // Hardcoded fallback (used when shop address can't be resolved)
     private static final String TOKEN = "53953c8b-4c11-11f1-a973-aee5264794df";
     private static final int SHOP_ID = 200253;
-    public static final int FROM_DISTRICT_ID = 1463;
+    public static final int DEFAULT_DISTRICT_ID = 1463;
+
+    // Cache: districtName (lowercase, no diacritics) -> districtId
+    private Map<String, Integer> districtCache = null;
 
     private static final String BASE_URL_V2 = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2";
     private static final String BASE_URL_MASTER = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data";
@@ -74,7 +79,7 @@ public class GHNService {
         }
     }
 
-    public int calculateFee(int toDistrictId, String toWardCode, int totalWeight, int length, int width, int height, int insuranceValue, List<Map<String, Object>> items) {
+    public int calculateFee(int fromDistrictId, int toDistrictId, String toWardCode, int totalWeight, int length, int width, int height, int insuranceValue, List<Map<String, Object>> items) {
         try {
             String url = BASE_URL_V2 + "/shipping-order/fee";
             
@@ -89,7 +94,7 @@ public class GHNService {
             int serviceTypeId = (finalChargeWeight > 20000) ? 5 : 2;
 
             Map<String, Object> body = new HashMap<>();
-            body.put("from_district_id", FROM_DISTRICT_ID);
+            body.put("from_district_id", fromDistrictId);
             body.put("to_district_id", toDistrictId);
             body.put("to_ward_code", toWardCode);
             body.put("service_type_id", serviceTypeId);
@@ -113,6 +118,70 @@ public class GHNService {
             System.err.println("[GHN_CALCULATE_FEE] Error: " + e.getMessage());
         }
         return 0; 
+    }
+
+    /**
+     * Resolve a shop's text address to a GHN district_id.
+     * Loads and caches all provinces+districts from GHN on first call,
+     * then fuzzy-matches the address text.
+     */
+    @SuppressWarnings("unchecked")
+    public int resolveDistrictIdFromAddress(String shopAddress) {
+        if (shopAddress == null || shopAddress.isBlank()) {
+            return DEFAULT_DISTRICT_ID;
+        }
+
+        // Build cache if needed
+        if (districtCache == null) {
+            districtCache = new HashMap<>();
+            try {
+                Object provincesObj = getProvinces();
+                if (provincesObj instanceof List) {
+                    List<Map<String, Object>> provinces = (List<Map<String, Object>>) provincesObj;
+                    for (Map<String, Object> prov : provinces) {
+                        int provinceId = Integer.parseInt(prov.get("ProvinceID").toString());
+                        try {
+                            Object districtsObj = getDistricts(provinceId);
+                            if (districtsObj instanceof List) {
+                                List<Map<String, Object>> districts = (List<Map<String, Object>>) districtsObj;
+                                for (Map<String, Object> dist : districts) {
+                                    int distId = Integer.parseInt(dist.get("DistrictID").toString());
+                                    String distName = dist.get("DistrictName") != null ? dist.get("DistrictName").toString() : "";
+                                    if (!distName.isBlank()) {
+                                        districtCache.put(removeDiacritics(distName.toLowerCase().trim()), distId);
+                                    }
+                                }
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("[GHN] Failed to build district cache: " + e.getMessage());
+            }
+        }
+
+        // Normalize the shop address for matching
+        String normalizedAddress = removeDiacritics(shopAddress.toLowerCase());
+
+        // Try to find the best (longest) matching district name in the address
+        String bestMatch = null;
+        int bestDistrictId = DEFAULT_DISTRICT_ID;
+        for (Map.Entry<String, Integer> entry : districtCache.entrySet()) {
+            if (normalizedAddress.contains(entry.getKey())) {
+                if (bestMatch == null || entry.getKey().length() > bestMatch.length()) {
+                    bestMatch = entry.getKey();
+                    bestDistrictId = entry.getValue();
+                }
+            }
+        }
+
+        System.out.println("[GHN] Resolved '" + shopAddress + "' -> district_id=" + bestDistrictId + (bestMatch != null ? " (matched: " + bestMatch + ")" : " (fallback)"));
+        return bestDistrictId;
+    }
+
+    private static String removeDiacritics(String input) {
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "").replace('đ', 'd').replace('Đ', 'D');
     }
 
     public String createShippingOrder(String toName, String toPhone, String addressDetail, String wardCode, int districtId, int codAmount, List<Map<String, Object>> items) {

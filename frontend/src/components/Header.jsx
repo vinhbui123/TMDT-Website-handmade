@@ -42,9 +42,9 @@ function Header({ user, categories, cartCount }) {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
-      };
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   // Xử lý Debounce gọi API Gợi ý
@@ -62,9 +62,9 @@ function Header({ user, categories, cartCount }) {
         const res = await fetch(`http://localhost:8080/api/products/search?keyword=${inputKeyword}`);
         // Kiểm tra API trả về thành công mới lấy data
         if (res.ok) {
-           const data = await res.json();
-           setSuggestions(data);
-           setShowDropdown(true);
+          const data = await res.json();
+          setSuggestions(data);
+          setShowDropdown(true);
         }
       } catch (error) {
         console.error("Lỗi tải gợi ý", error);
@@ -95,7 +95,7 @@ function Header({ user, categories, cartCount }) {
           {/* Logo */}
           <div className="header-logo">
             <a href="/">
-              <span className="logo-text">🎨 HandMade</span>
+              <span className="logo-text"> HandMade</span>
             </a>
           </div>
 
@@ -125,7 +125,7 @@ function Header({ user, categories, cartCount }) {
                         className="search-dropdown-item"
                         onClick={() => setShowDropdown(false)}
                       >
-                        <img src={prod.img} alt={prod.name} className="search-dropdown-img"/>
+                        <img src={prod.img} alt={prod.name} className="search-dropdown-img" />
                         <div className="search-dropdown-info">
                           <h6 className="search-dropdown-name">{prod.name}</h6>
                           <span className="search-dropdown-price">{prod.price.toLocaleString()} VNĐ</span>
@@ -202,7 +202,7 @@ function Header({ user, categories, cartCount }) {
                         src={user.avatar}
                         alt="Avatar"
                         className="avatar-img"
-                        onError={(e) => { e.target.src = '/images/default-avatar.png' }}
+                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}&background=D4A373&color=fff&size=50` }}
                       />
                     ) : (
                       <div className="avatar-placeholder">
@@ -224,7 +224,7 @@ function Header({ user, categories, cartCount }) {
                             src={user.avatar}
                             alt="Avatar"
                             className="dropdown-avatar"
-                            onError={(e) => { e.target.src = '/images/default-avatar.png' }}
+                            onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName || 'User')}&background=D4A373&color=fff&size=50` }}
                           />
                         ) : (
                           <div className="dropdown-avatar-placeholder">

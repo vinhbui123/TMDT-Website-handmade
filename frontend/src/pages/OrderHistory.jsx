@@ -32,6 +32,13 @@ function OrderHistory() {
     const [reviewProduct, setReviewProduct] = useState(null);
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewContent, setReviewContent] = useState('');
+    const [reviewedLocal, setReviewedLocal] = useState(() => {
+        try {
+            return JSON.parse(localStorage.getItem('reviewedProducts') || '[]');
+        } catch {
+            return [];
+        }
+    });
 
     const navigate = useNavigate();
 
@@ -138,6 +145,12 @@ function OrderHistory() {
             if (res.ok) {
                 alert('Đánh giá của bạn đã được gửi thành công!');
                 setReviewModalOpen(false);
+                
+                // Cập nhật trạng thái đã đánh giá và lưu vào localStorage để ẩn nút
+                const pId = reviewProduct.id;
+                const updatedReviewed = [...reviewedLocal, pId];
+                setReviewedLocal(updatedReviewed);
+                localStorage.setItem('reviewedProducts', JSON.stringify(updatedReviewed));
             } else if (res.status === 401) {
                 alert('Vui lòng đăng nhập để đánh giá.');
             } else {
@@ -207,7 +220,7 @@ function OrderHistory() {
                                         </div>
                                         <div style={{ textAlign: 'right', fontWeight: 'bold' }}>
                                             {formatVND(item.totalMoney)}
-                                            {isDelivered && (
+                                            {isDelivered && !reviewedLocal.includes(item.product?.id || item.productId) && (
                                                 <div style={{ marginTop: '8px' }}>
                                                     <button
                                                         onClick={e => {

@@ -99,12 +99,6 @@ public class ShopProfileController {
         if (shopName == null || shopName.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Tên shop không được để trống."));
         }
-        if (shopAddress == null || shopAddress.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Địa chỉ shop không được để trống."));
-        }
-        if (ownerName == null || ownerName.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Họ tên chủ shop không được để trống."));
-        }
         if (identityCardNumber != null && !identityCardNumber.trim().isEmpty()) {
             if (!identityCardNumber.trim().matches("\\d{12}")) {
                 return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Số CCCD phải gồm đúng 12 chữ số."));

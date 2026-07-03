@@ -76,9 +76,17 @@ public class ShopCouponController {
         coupon.setMinOrderAmount(coupon.getMinOrderAmount() != null ? coupon.getMinOrderAmount() : 0);
         coupon.setMaxDiscount(coupon.getMaxDiscount() != null ? coupon.getMaxDiscount() : 0);
         coupon.setQuantity(coupon.getQuantity() != null ? coupon.getQuantity() : 100);
-        couponRepository.save(coupon);
 
-        return ResponseEntity.ok(Map.of("success", true, "message", "Tạo mã giảm giá thành công"));
+        try {
+            couponRepository.save(coupon);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Tạo mã giảm giá thành công"));
+        } catch (Exception e) {
+            String msg = "Lỗi tạo mã giảm giá";
+            if (e.getMessage() != null && e.getMessage().contains("Duplicate")) {
+                msg = "Mã giảm giá '" + code + "' đã tồn tại, vui lòng chọn mã khác";
+            }
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", msg));
+        }
     }
 
     /**

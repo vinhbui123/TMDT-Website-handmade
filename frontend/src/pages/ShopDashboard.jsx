@@ -18,8 +18,8 @@ export default function ShopDashboard() {
     const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
     const [editingCoupon, setEditingCoupon] = useState(null);
     const [couponForm, setCouponForm] = useState({
-        code: '', discountType: 'FIXED', discountValue: 0,
-        minOrderAmount: 0, maxDiscount: 0, quantity: 100,
+        code: '', discountType: 'FIXED', discountValue: '',
+        minOrderAmount: '', maxDiscount: '', quantity: 100,
         startDate: '', endDate: '', active: true
     });
     const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export default function ShopDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [formData, setFormData] = useState({ 
-        name: '', price: 0, discount: 0, catalog_id: 1, description: '', img: '',
+        name: '', price: '', discount: '', catalog_id: 1, description: '', img: '',
         colors: [], materials: [], subImg: []
     });
     const [uploading, setUploading] = useState(false);
@@ -238,7 +238,8 @@ export default function ShopDashboard() {
                 setProfile({ ...profile, shopLogo: data.data?.shopLogo || profile.shopLogo, logoFile: null });
                 alert('Cập nhật hồ sơ thành công!');
             } else {
-                alert('Có lỗi xảy ra khi cập nhật hồ sơ!');
+                const errData = await res.json().catch(() => null);
+                alert(errData?.message || 'Có lỗi xảy ra khi cập nhật hồ sơ!');
             }
         } catch (err) { console.error(err); }
     };
@@ -364,7 +365,7 @@ export default function ShopDashboard() {
                                         className="btn-primary"
                                         onClick={() => {
                                             setEditingProduct(null);
-                                            setFormData({ name: '', price: 0, discount: 0, catalog_id: 1, description: '', img: '', colors: [], materials: [], subImg: [] });
+                                            setFormData({ name: '', price: '', discount: '', catalog_id: 1, description: '', img: '', colors: [], materials: [], subImg: [] });
                                             setIsModalOpen(true);
                                         }}
                                     >
@@ -564,7 +565,7 @@ export default function ShopDashboard() {
                                     <h2>Quản lý Mã Giảm Giá</h2>
                                     <button className="btn-primary" onClick={() => {
                                         setEditingCoupon(null);
-                                        setCouponForm({ code: '', discountType: 'FIXED', discountValue: 0, minOrderAmount: 0, maxDiscount: 0, quantity: 100, startDate: '', endDate: '', active: true });
+                                        setCouponForm({ code: '', discountType: 'FIXED', discountValue: '', minOrderAmount: '', maxDiscount: '', quantity: 100, startDate: '', endDate: '', active: true });
                                         setIsCouponModalOpen(true);
                                     }}>+ Tạo mã mới</button>
                                 </div>
@@ -764,11 +765,11 @@ export default function ShopDashboard() {
                             <div className="shop-modal-row">
                                 <div className="shop-form-group">
                                     <label>Giá (VNĐ)</label>
-                                    <input type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: Number(e.target.value) })} required />
+                                    <input type="number" value={formData.price} placeholder="0" onChange={e => setFormData({ ...formData, price: e.target.value ? Number(e.target.value) : '' })} required />
                                 </div>
                                 <div className="shop-form-group">
                                     <label>Giảm giá (%)</label>
-                                    <input type="number" value={formData.discount} onChange={e => setFormData({ ...formData, discount: Number(e.target.value) })} />
+                                    <input type="number" value={formData.discount} placeholder="0" onChange={e => setFormData({ ...formData, discount: e.target.value ? Number(e.target.value) : '' })} />
                                 </div>
                             </div>
 
@@ -1078,21 +1079,21 @@ export default function ShopDashboard() {
                                 </div>
                                 <div className="shop-form-group">
                                     <label>Giá trị giảm {couponForm.discountType === 'PERCENT' ? '(%)' : '(VNĐ)'}</label>
-                                    <input type="number" value={couponForm.discountValue}
-                                        onChange={e => setCouponForm({...couponForm, discountValue: Number(e.target.value) || 0})} required />
+                                    <input type="number" value={couponForm.discountValue} placeholder="0"
+                                        onChange={e => setCouponForm({...couponForm, discountValue: e.target.value ? Number(e.target.value) : ''})} required />
                                 </div>
                             </div>
                             <div className="shop-modal-row">
                                 <div className="shop-form-group">
                                     <label>Đơn hàng tối thiểu (VNĐ)</label>
-                                    <input type="number" value={couponForm.minOrderAmount}
-                                        onChange={e => setCouponForm({...couponForm, minOrderAmount: Number(e.target.value) || 0})} />
+                                    <input type="number" value={couponForm.minOrderAmount} placeholder="0"
+                                        onChange={e => setCouponForm({...couponForm, minOrderAmount: e.target.value ? Number(e.target.value) : ''})} />
                                 </div>
                                 {couponForm.discountType === 'PERCENT' && (
                                     <div className="shop-form-group">
                                         <label>Giảm tối đa (VNĐ)</label>
-                                        <input type="number" value={couponForm.maxDiscount}
-                                            onChange={e => setCouponForm({...couponForm, maxDiscount: Number(e.target.value) || 0})} />
+                                        <input type="number" value={couponForm.maxDiscount} placeholder="0"
+                                            onChange={e => setCouponForm({...couponForm, maxDiscount: e.target.value ? Number(e.target.value) : ''})} />
                                     </div>
                                 )}
                             </div>

@@ -438,7 +438,7 @@
     margin-bottom: 6px;
 }
 
-.shop-form-group input,
+.shop-form-group input:not([type="checkbox"]):not([type="radio"]),
 .shop-form-group textarea {
     width: 100%;
     padding: 12px 16px;
@@ -452,7 +452,7 @@
     background: #fff;
 }
 
-.shop-form-group input:focus,
+.shop-form-group input:not([type="checkbox"]):not([type="radio"]):focus,
 .shop-form-group textarea:focus {
     border-color: #D4A373;
     box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.15);

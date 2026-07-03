@@ -35,10 +35,6 @@ function VNPayReturn() {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
                 backgroundColor: '#fff'
             }}>
-                <div style={{ fontSize: '60px', marginBottom: '20px' }}>
-                    {responseCode === '00' ? '✅' : '❌'}
-                </div>
-
                 <h2 style={{ color: responseCode === '00' ? '#28a745' : '#dc3545', marginBottom: '10px' }}>
                     {status}
                 </h2>

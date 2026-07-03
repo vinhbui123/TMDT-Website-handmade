@@ -81,10 +81,16 @@ public class ShopProductController {
 
         try {
             product.setShop(shopOpt.get());
+            product.setCreated_at(new java.util.Date());
+            product.setUpdated_at(new java.util.Date());
             Product saved = productRepository.save(product);
             return ResponseEntity.ok(Map.of("success", true, "data", saved));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Lỗi tạo sản phẩm: " + e.getMessage()));
+            String msg = "Lỗi tạo sản phẩm";
+            if (e.getMessage() != null && e.getMessage().contains("Duplicate")) {
+                msg = "Sản phẩm bị trùng dữ liệu, vui lòng kiểm tra lại";
+            }
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", msg));
         }
     }
 
@@ -109,7 +115,7 @@ public class ShopProductController {
 
         return productRepository.findById(id).map(product -> {
             // Kiểm tra xem sản phẩm có thuộc về shop này không
-            if (product.getShop() == null || product.getShop().getId() != shopOpt.get().getId()) {
+            if (product.getShop() == null || !product.getShop().getId().equals(shopOpt.get().getId())) {
                  throw new RuntimeException("Không có quyền sửa sản phẩm này");
             }
 
@@ -151,7 +157,7 @@ public class ShopProductController {
         }
 
         return productRepository.findById(id).map(product -> {
-            if (product.getShop() == null || product.getShop().getId() != shopOpt.get().getId()) {
+            if (product.getShop() == null || !product.getShop().getId().equals(shopOpt.get().getId())) {
                 throw new RuntimeException("Không có quyền xóa sản phẩm này");
             }
             productRepository.delete(product);

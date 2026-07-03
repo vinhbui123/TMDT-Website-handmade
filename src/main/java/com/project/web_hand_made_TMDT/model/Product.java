@@ -18,10 +18,11 @@ import java.util.Set;
 @Builder
 public class Product {
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "catalog_id")
-    private int catalog_id;
+    private Integer catalog_id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shop_id")
@@ -34,13 +35,13 @@ public class Product {
     private String img;
 
     @Column(name = "price")
-    private int price;
+    private Integer price;
 
     @Column(name = "discount")
-    private int discount;
+    private Integer discount;
 
     @Column(name = "view")
-    private int view;
+    private Integer view;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
@@ -70,7 +71,7 @@ public class Product {
     }
 
     @Transient
-    private int stock; // Biến tạm để tính toán nếu cần
+    private Integer stock; // Biến tạm để tính toán nếu cần
 
     // Kết nối bảng màu sắc
     @ManyToMany(fetch = FetchType.EAGER)
